@@ -6,10 +6,7 @@ export default defineConfig({
   resolve: {
     alias: {
       '@': '/src',
-      'os': 'os-browserify/browser',
       'path': 'path-browserify',
-      'fs': 'browserify-fs',
-      'stream': 'stream-browserify',
       'util': 'util',
       'buffer': 'buffer',
     },
