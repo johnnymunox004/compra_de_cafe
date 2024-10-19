@@ -23,7 +23,7 @@ export default function Home() {
             to="/login" 
             className="text-lg text-white hover:text-gray-300 transition-colors duration-200 font-semibold"
           >
-            Iniciar Sesiónnnnnnnnnnnnnnnnnnnnnnnnnnnnnnn
+            Iniciar Sesión
           </Link>
         </div>
 
