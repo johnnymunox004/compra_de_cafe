@@ -11,7 +11,7 @@ const useAspirantesStore = create((set) => ({
     try {
       const token = localStorage.getItem('token');
       
-      const response = await axios.get("http://localhost:1500/api/aspirantes", {
+      const response = await axios.get("https://compra-de-cafe-backend.onrender.com/api/aspirantes", {
         headers: {
           "Content-Type": "application/json",
           "Authorization": `Bearer ${token}`,
@@ -27,7 +27,7 @@ const useAspirantesStore = create((set) => ({
     set({ loading: true });
     try {
       const token = localStorage.getItem('token');
-      await axios.post("http://localhost:1500/api/aspirantes", newAspirante, {
+      await axios.post("https://compra-de-cafe-backend.onrender.com/api/aspirantes", newAspirante, {
         headers: {
           "Content-Type": "application/json",
           "Authorization": `Bearer ${token}`,
@@ -43,7 +43,7 @@ const useAspirantesStore = create((set) => ({
     set({ loading: true });
     try {
       const token = localStorage.getItem('token');
-      await axios.post("http://localhost:1500/api/empleados", newAspirante, {
+      await axios.post("https://compra-de-cafe-backend.onrender.com/api/empleados", newAspirante, {
         headers: {
           "Content-Type": "application/json",
           "Authorization": `Bearer ${token}`,
@@ -59,7 +59,7 @@ const useAspirantesStore = create((set) => ({
     set({ loading: true });
     try {
       const token = localStorage.getItem('token');
-      await axios.put(`http://localhost:1500/api/aspirantes/${id}`, updatedAspirante, {
+      await axios.put(`https://compra-de-cafe-backend.onrender.com/api/aspirantes/${id}`, updatedAspirante, {
         headers: {
           "Content-Type": "application/json",
           "Authorization": `Bearer ${token}`,
@@ -80,7 +80,7 @@ const useAspirantesStore = create((set) => ({
     set({ loading: true });
     try {
       const token = localStorage.getItem('token');
-      await axios.delete(`http://localhost:1500/api/aspirantes/${id}`, {
+      await axios.delete(`https://compra-de-cafe-backend.onrender.com/api/aspirantes/${id}`, {
         headers: {
           "Content-Type": "application/json",
           "Authorization": `Bearer ${token}`,
