@@ -31,7 +31,7 @@ const LoginPage = () => {
     }
 
     try {
-      const response = await axios.post('http://localhost:1500/api/auth/login', {
+      const response = await axios.post('https://compra-de-cafe-backend.onrender.com/api/auth/login', {
         user,
         password,
         token2FA: is2FAEnabled ? token2FA : null,
@@ -65,7 +65,7 @@ const LoginPage = () => {
     }
 
     try {
-      await axios.post('http://localhost:666/api/auth/register', { user, password, email });
+      await axios.post('https://compra-de-cafe-backend.onrender.com/api/auth/register', { user, password, email });
       setError('Registration successful, please log in.');
       setIsRegistering(false);
     } catch (error) {
