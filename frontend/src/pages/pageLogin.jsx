@@ -1,9 +1,9 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import useAuthStore from '../store/useAuthStore';
 import { Link } from 'react-router-dom';
-import '../App';
+import '../App'
 
 const LoginPage = () => {
   const [user, setUser] = useState('');
@@ -16,24 +16,9 @@ const LoginPage = () => {
   const [isRegistering, setIsRegistering] = useState(false);
   const [showMissingFields, setShowMissingFields] = useState(false);
   const [is2FAEnabled, setIs2FAEnabled] = useState(true);
-  const [isServerOnline, setIsServerOnline] = useState(false); // Estado del servidor
 
   const navigate = useNavigate();
   const setToken = useAuthStore((state) => state.setToken);
-
-  // Verificar el estado del servidor al cargar el componente
-  useEffect(() => {
-    const checkServerStatus = async () => {
-      try {
-        await axios.get('https://compra-de-cafe-backend.onrender.com/api/auth/login');
-        setIsServerOnline(true); // Servidor en línea
-      } catch (error) {
-        setIsServerOnline(false); // Servidor fuera de línea
-      }
-    };
-
-    checkServerStatus();
-  }, []);
 
   const handleLogin = async (e) => {
     e.preventDefault();
@@ -209,12 +194,6 @@ const LoginPage = () => {
           <Link to="/" className="home-link">
             Inicio
           </Link>
-        </div>
-        {/* Botón para mostrar el estado del servidor */}
-        <div className="server-status">
-          <button className={`status-button ${isServerOnline ? 'online' : 'offline'}`}>
-            {isServerOnline ? 'Servidor en línea' : 'Servidor fuera de línea'}
-          </button>
         </div>
       </div>
     </div>
