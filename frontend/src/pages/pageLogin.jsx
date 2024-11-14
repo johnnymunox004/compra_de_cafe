@@ -3,7 +3,7 @@ import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import useAuthStore from '../store/useAuthStore';
 import { Link } from 'react-router-dom';
-import '../App'
+import '../App';
 
 const LoginPage = () => {
   const [user, setUser] = useState('');
@@ -16,6 +16,7 @@ const LoginPage = () => {
   const [isRegistering, setIsRegistering] = useState(false);
   const [showMissingFields, setShowMissingFields] = useState(false);
   const [is2FAEnabled, setIs2FAEnabled] = useState(true);
+  const [connectionStatus, setConnectionStatus] = useState(null); // Estado para la conexión
 
   const navigate = useNavigate();
   const setToken = useAuthStore((state) => state.setToken);
@@ -70,6 +71,16 @@ const LoginPage = () => {
       setIsRegistering(false);
     } catch (error) {
       setError('An error occurred during registration. Please try again.');
+    }
+  };
+
+  // Función para verificar la conexión al servidor
+  const checkServerConnection = async () => {
+    try {
+      await axios.get('https://compra-de-cafe-backend.onrender.com/health-check');
+      setConnectionStatus('Connected');
+    } catch (error) {
+      setConnectionStatus('Failed to connect');
     }
   };
 
@@ -194,6 +205,17 @@ const LoginPage = () => {
           <Link to="/" className="home-link">
             Inicio
           </Link>
+        </div>
+        {/* Botón para verificar la conexión al servidor */}
+        <div className="server-connection-container">
+          <button onClick={checkServerConnection} className="connection-button">
+            Check Server Connection
+          </button>
+          {connectionStatus && (
+            <p className={`connection-status ${connectionStatus === 'Connected' ? 'success' : 'error'}`}>
+              {connectionStatus}
+            </p>
+          )}
         </div>
       </div>
     </div>
