@@ -190,6 +190,23 @@ export default function Home() {
           <p>&copy; 2024 Café Campesino. Todos los derechos reservados.</p>
           <p className="mt-2 text-gray-400">Comprometidos con el comercio justo y el apoyo a nuestros productores locales.</p>
         </div>
+        <section className="py-16 bg-gray-200">
+  <div className="container mx-auto">
+    <h2 className="text-4xl font-bold text-center mb-8">Palabras Clave Relacionadas</h2>
+    <p className="text-center mb-6">
+      Hemos identificado palabras clave importantes que conectan con nuestros usuarios:
+    </p>
+    <ul className="list-disc pl-8 text-lg text-gray-700">
+      <li>"Café Natagá de calidad"</li>
+      <li>"Cooperativa Coopsantuario"</li>
+      <li>"Comprar café en Natagá"</li>
+    </ul>
+    <p className="text-center mt-6">
+      Utilizamos herramientas como Google Keyword Planner y AnswerThePublic para mejorar continuamente.
+    </p>
+  </div>
+</section>
+
       </footer>
     </div>
   );
