@@ -24,6 +24,7 @@ function Dashboard() {
   const [totalCafe, setTotalCafe] = useState(0);
   const [numeroCompras, setNumeroCompras] = useState(0);
   const [numeroVentas, setNumeroVentas] = useState(0);
+  const [selectedWeek, setSelectedWeek] = useState(null);
 
   // Estado para la gráfica
   const [chartData, setChartData] = useState({
@@ -41,9 +42,34 @@ function Dashboard() {
     fetchAspirantes();
   }, [fetchAspirantes]);
 
+  // Función para obtener el rango de fechas de una semana específica
+  const getWeekRange = (weekOffset = 0) => {
+    const now = new Date();
+    const startOfWeek = new Date(now.setDate(now.getDate() - now.getDay() + (weekOffset * 7)));
+    startOfWeek.setHours(0, 0, 0, 0);
+    const endOfWeek = new Date(startOfWeek);
+    endOfWeek.setDate(startOfWeek.getDate() + 6);
+    endOfWeek.setHours(23, 59, 59, 999);
+    return { start: startOfWeek, end: endOfWeek };
+  };
+
+  // Función para filtrar aspirantes por semana
+  const filterAspirantesByWeek = (aspirantesArray, weekOffset = 0) => {
+    const { start, end } = getWeekRange(weekOffset);
+    return aspirantesArray.filter(aspirante => {
+      const aspiranteDate = new Date(aspirante.fecha); // Assuming there's a 'fecha' field
+      return aspiranteDate >= start && aspiranteDate <= end;
+    });
+  };
+
   useEffect(() => {
     if (aspirantes.length > 0) {
-      const filtered = aspirantes.map(aspirante => ({
+      // Filtrar aspirantes por semana si se ha seleccionado
+      const filtered = selectedWeek !== null 
+        ? filterAspirantesByWeek(aspirantes, selectedWeek)
+        : aspirantes;
+
+      const processedAspirantes = filtered.map(aspirante => ({
         id: aspirante.id,
         precio: parseFloat(aspirante.precio),
         estado: aspirante.estado,
@@ -51,26 +77,24 @@ function Dashboard() {
         peso: parseFloat(aspirante.peso),
       }));
 
-      setFilteredAspirantes(filtered);
-
       // Actualizar totales
-      const totalCompra = filtered
+      const totalCompra = processedAspirantes
         .filter(aspirante => aspirante.estado === "compra")
         .reduce((acc, aspirante) => acc + (aspirante.precio || 0), 0);
 
-      const totalVenta = filtered
+      const totalVenta = processedAspirantes
         .filter(aspirante => aspirante.estado === "venta")
         .reduce((acc, aspirante) => acc + (aspirante.precio || 0), 0);
 
-      const totalCafe = filtered
+      const totalCafe = processedAspirantes
         .filter(aspirante => aspirante.estado === "compra")
         .reduce((acc, aspirante) => acc + (aspirante.peso || 0), 0) -
-        filtered
+        processedAspirantes
         .filter(aspirante => aspirante.estado === "venta")
         .reduce((acc, aspirante) => acc + (aspirante.peso || 0), 0);
 
-      const numeroCompras = filtered.filter(aspirante => aspirante.estado === "compra").length;
-      const numeroVentas = filtered.filter(aspirante => aspirante.estado === "venta").length;
+      const numeroCompras = processedAspirantes.filter(aspirante => aspirante.estado === "compra").length;
+      const numeroVentas = processedAspirantes.filter(aspirante => aspirante.estado === "venta").length;
 
       setTotalCompra(totalCompra);
       setTotalVenta(totalVenta);
@@ -79,9 +103,9 @@ function Dashboard() {
       setNumeroVentas(numeroVentas);
 
       // Calcular datos para la gráfica
-      const coffeeTypes = ['Caturra', 'Variedad Colombia', 'F6', 'Borboun Rosado', 'Geishar', 'Tabi', 'Variedad Castillo'];
+      const coffeeTypes = ['seco','Caturra', 'Variedad Colombia', 'F6', 'Borboun Rosado', 'Geishar', 'Tabi', 'Variedad Castillo'];
       const weights = coffeeTypes.map(type => {
-        return filtered
+        return processedAspirantes
           .filter(aspirante => aspirante.tipo_cafe === type)
           .reduce((acc, aspirante) => acc + (aspirante.peso || 0), 0);
       });
@@ -95,14 +119,21 @@ function Dashboard() {
         }],
       });
     } else {
+      // Resetear todos los estados si no hay aspirantes
       setTotalCompra(0);
       setTotalVenta(0);
       setTotalCafe(0);
       setNumeroCompras(0);
       setNumeroVentas(0);
-      setChartData({ labels: [], datasets: [] }); // Resetear gráfica
+      setChartData({ labels: [], datasets: [] });
     }
-  }, [aspirantes]);
+  }, [aspirantes, selectedWeek]);
+
+  // Función para obtener el texto descriptivo de la semana
+  const getWeekLabel = (weekOffset) => {
+    const { start, end } = getWeekRange(weekOffset);
+    return `Semana del ${start.toLocaleDateString()} al ${end.toLocaleDateString()}`;
+  };
 
   if (loading) return <div>Cargando...</div>;
   if (error) return <div>Error: {error}</div>;
@@ -114,7 +145,33 @@ function Dashboard() {
       </div>
 
       <div className="main-dashboard">
-        <h1 className=" font-bold text-3xl ">almacen </h1>
+        <h1 className="font-bold text-3xl">Almacen</h1>
+
+        {/* Botones de selección de semana */}
+        <div className="week-selector mb-4">
+          <button 
+            className={`mr-2 px-4 py-2 rounded ${selectedWeek === null ? 'bg-blue-500 text-white' : 'bg-gray-200'}`}
+            onClick={() => setSelectedWeek(null)}
+          >
+            Todas las semanas
+          </button>
+          {[-1, 0, 1].map((weekOffset) => (
+            <button
+              key={weekOffset}
+              className={`mr-2 px-4 py-2 rounded ${selectedWeek === weekOffset ? 'bg-blue-500 text-white' : 'bg-gray-200'}`}
+              onClick={() => setSelectedWeek(weekOffset)}
+            >
+              {weekOffset < 0 ? 'Semana anterior' : weekOffset === 0 ? 'Semana actual' : 'Próxima semana'}
+            </button>
+          ))}
+        </div>
+
+        {/* Mostrar la semana seleccionada */}
+        {selectedWeek !== null && (
+          <div className="week-label mb-4">
+            <p className="text-lg font-semibold">{getWeekLabel(selectedWeek)}</p>
+          </div>
+        )}
 
         <div className="targeta">
           <div className="card">
