@@ -29,6 +29,7 @@ function DashboardListAspirant() {
     precio_total: "",
     telefono: "",
     estado: "",
+    estado_monetario:"",
     date_create: "", 
   });
   const [editMode, setEditMode] = useState(false);
@@ -84,6 +85,7 @@ function DashboardListAspirant() {
       precio_total: "",
       telefono: "",
       estado: "",
+      estado_monetario:"",
       date_create: "",
     });
     setEditMode(false);
@@ -132,6 +134,7 @@ function DashboardListAspirant() {
 
     Teléfono: aspirante.telefono,
     Estado: aspirante.estado,
+    Estado_monetario:aspirante.estado_monetario,
     Fecha: aspirante.date_create,  
   }));
   const getVentasPorDia = () => {
@@ -269,6 +272,8 @@ function DashboardListAspirant() {
         <th className="px-4 py-2 border">Precio_total</th>
 
         <th className="px-4 py-2 border">Estado</th>
+        <th className="px-4 py-2 border">Estado_mon</th>
+
         <th className="px-4 py-2 border">Fecha</th>
         <th className="px-4 py-2 border">Acciones</th>
       </tr>
@@ -286,6 +291,8 @@ function DashboardListAspirant() {
           <td className="px-4 py-2 border">${aspirante.precio_total} </td>
 
           <td className="px-4 py-2 border">{aspirante.estado}</td>
+          <td className="px-4 py-2 border">{aspirante.estado_monetario}</td>
+
           <td className="px-4 py-2 border">{new Date(aspirante.date_create).toLocaleDateString()}</td>
           <td className="px-4 py-2 border flex gap-5">
             <Button onClick={() => handleEdit(aspirante)} className="mr-2" color="warning">
