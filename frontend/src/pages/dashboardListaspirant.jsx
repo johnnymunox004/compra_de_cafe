@@ -339,6 +339,7 @@ function DashboardListAspirant() {
                         peso={aspirante.peso}
                         precio={aspirante.precio}
                         estado={aspirante.estado}
+                        estado_monetario={aspirante.estado_monetario}
                         date_create={aspirante.date_create}
                       />
                       <Button

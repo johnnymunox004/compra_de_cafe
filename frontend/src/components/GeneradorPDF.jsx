@@ -2,50 +2,85 @@ import jsPDF from 'jspdf';
 import { Button } from 'flowbite-react';
 import React from 'react';
 
-
-function GeneradorPDF({ id, nombre, telefono, correo, file, Identificación, Teléfono, sexo, edad }) {
+function GeneradorPDF({ 
+  id, 
+  nombre, 
+  telefono, 
+  tipo_cafe, 
+  peso, 
+  precio, 
+  estado, 
+  estado_monetario, 
+  date_create 
+}) {
   const generarPDF = () => {
     const doc = new jsPDF();
     
-    // Títulos y estilos
-    doc.setFontSize(18);
-    doc.setTextColor(40);
-    doc.setFont('helvetica', 'bold');
-
-    // Contenido del PDF
-    doc.text(`Perfil del Usuario - ID: ${id}`, 14, 20);
-
-    // Datos del usuario
+    // Configuración de estilos
     doc.setFontSize(12);
-    doc.setTextColor(100);
-    doc.setFont('helvetica', 'normal');
-    doc.text(`Nombre: ${nombre}`, 14, 30);
-    doc.text(`Teléfono: ${telefono}`, 14, 40);
-    doc.text(`Correo: ${correo}`, 14, 50);
-    doc.text(`Identificación: ${Identificación}`, 14, 60);
-    doc.text(`Teléfono: ${Teléfono}`, 14, 70);
-    doc.text(`Sexo: ${sexo}`, 14, 80);
-    doc.text(`Edad: ${edad}`, 14, 90);
-    doc.text(`file: ${file}`, 14, 100);
-
-
-    // Agregar línea de separación
+    
+    // Encabezado
+    doc.setFont('helvetica', 'bold');
+    doc.text('RECIBO DE PAGO', 105, 20, { align: 'center' });
+    doc.text('Comprobante de Transacción', 105, 27, { align: 'center' });
+    
+    // Línea decorativa
     doc.setLineWidth(0.5);
-    doc.line(14, 115, 200, 115);
+    doc.line(20, 35, 190, 35);
+    
+    // Información de la transacción
+    doc.setFont('helvetica', 'normal');
+    doc.text(`Número de Transacción: ${id}`, 20, 45);
+    doc.text(`Fecha: ${new Date(date_create).toLocaleDateString()}`, 20, 52);
+    
+    // Detalles del cliente
+    doc.setFont('helvetica', 'bold');
+    doc.text('Información del Cliente', 20, 65);
+    doc.setFont('helvetica', 'normal');
+    doc.text(`Nombre: ${nombre}`, 20, 72);
+    doc.text(`Teléfono: ${telefono}`, 20, 79);
+    
+    // Detalles de la compra
+    doc.setFont('helvetica', 'bold');
+    doc.text('Detalles de la Compra', 20, 92);
+    doc.setFont('helvetica', 'normal');
+    doc.text(`Tipo de Café: ${tipo_cafe}`, 20, 99);
+    doc.text(`Peso: ${peso} kg`, 20, 106);
+    
+    // Información de Pago
+    doc.setFont('helvetica', 'bold');
+    doc.text('Resumen de Pago', 20, 119);
+    doc.setFont('helvetica', 'normal');
+    doc.text(`Precio Total: $${precio}`, 20, 126);
+    doc.text(`Estado: ${estado}`, 20, 133);
+    doc.text(`Estado Monetario: ${estado_monetario}`, 20, 140);
+    
+    // Línea final
+    doc.setLineWidth(0.5);
+    doc.line(20, 150, 190, 150);
+    
+    // Pie de página
+    doc.setFontSize(8);
+    doc.setTextColor(100);
+    doc.text('Gracias por su compra', 105, 160, { align: 'center' });
+    doc.text('Este documento es un comprobante de transacción', 105, 165, { align: 'center' });
+    
+    // Código QR o número de verificación (simulado)
+    doc.text(`Código de Verificación: ${id.substring(0, 8)}`, 105, 175, { align: 'center' });
 
-    // Información adicional
-    doc.setFontSize(10);
-    doc.setTextColor(150);
-    doc.text(`Este documento ha sido generado automáticamente.`, 14, 110);
-    doc.text(`Fecha de creación: ${new Date().toLocaleDateString()}`, 14, 120);
-
-    // Guardar el PDF con un nombre específico
-    doc.save(`PerfilUsuario${id}.pdf`);
+    // Guardar PDF
+    doc.save(`Recibo_${id}.pdf`);
   };
 
   return (
     <div>
-      <Button color="success" className='mr-2 w-full' onClick={generarPDF}>Generar PDF</Button>
+      <Button 
+        color="success" 
+        className='mr-2 w-full' 
+        onClick={generarPDF}
+      >
+        Generar Recibo
+      </Button>
     </div>
   );
 }
