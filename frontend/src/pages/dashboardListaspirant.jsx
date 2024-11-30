@@ -457,21 +457,7 @@ function DashboardListAspirant() {
                 </select>
               </div>
               <div className="mb-4">
-                <Label htmlFor="estado" value="Estado" />
-                <select
-                  id="estado"
-                  name="estado"
-                  value={formData.estado}
-                  onChange={handleInputChange}
-                  required
-                  className="form-select"
-                >
-                  <option value="" disabled>
-                    Selecciona una opción
-                  </option>
-                  <option value="compra">Compra</option>
-                  <option value="venta">Venta</option>
-                </select>
+   
                 <select
           id="estado_monetario"
           name="estado_monetario"
