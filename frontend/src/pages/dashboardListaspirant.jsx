@@ -17,7 +17,6 @@ function DashboardListAspirant() {
     deleteAspirante,
   } = useAspirantesStore();
 
-  
   const [showModal, setShowModal] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [formData, setFormData] = useState({
@@ -29,8 +28,8 @@ function DashboardListAspirant() {
     precio_total: "",
     telefono: "",
     estado: "",
-    estado_monetario:"",
-    date_create: "", 
+    estado_monetario: "",
+    date_create: "",
   });
   const [editMode, setEditMode] = useState(false);
   const [currentId, setCurrentId] = useState(null);
@@ -46,24 +45,23 @@ function DashboardListAspirant() {
     const formattedValue = name === "precio" ? String(value) : value; // Convertir a cadena si es precio
     setFormData({ ...formData, [name]: formattedValue });
   };
-  
-  
+
   const handleDateChange = (e) => {
     setSelectedDate(e.target.value); // Actualizar la fecha seleccionada
   };
-  
 
   const handleSubmit = (e) => {
     e.preventDefault();
-  
+
     // Asegurarse de que precio sea una cadena antes de aplicar replace
     const formattedData = {
       ...formData,
-      precio: typeof formData.precio === 'string' 
-        ? Number(formData.precio.replace(/\D/g, ""))
-        : formData.precio, // Si ya es un número, lo mantenemos como está
+      precio:
+        typeof formData.precio === "string"
+          ? Number(formData.precio.replace(/\D/g, ""))
+          : formData.precio, // Si ya es un número, lo mantenemos como está
     };
-  
+
     if (editMode) {
       updateAspirante(currentId, formattedData).then(() => {
         window.location.reload(); // Actualizar la página después de la actualización
@@ -73,7 +71,7 @@ function DashboardListAspirant() {
         window.location.reload(); // Actualizar la página después de crear un nuevo aspirante
       });
     }
-  
+
     // Resetear el formulario
     setShowModal(false);
     setFormData({
@@ -85,12 +83,11 @@ function DashboardListAspirant() {
       precio_total: "",
       telefono: "",
       estado: "",
-      estado_monetario:"",
+      estado_monetario: "",
       date_create: "",
     });
     setEditMode(false);
   };
-  
 
   const handleEdit = (aspirante) => {
     setCurrentId(aspirante._id);
@@ -105,7 +102,12 @@ function DashboardListAspirant() {
     setDeleteId(null);
   };
 
-  if (loading) return <div><LoadingSpinner /></div>;
+  if (loading)
+    return (
+      <div>
+        <LoadingSpinner />
+      </div>
+    );
   if (error)
     return (
       <div>
@@ -134,60 +136,63 @@ function DashboardListAspirant() {
 
     Teléfono: aspirante.telefono,
     Estado: aspirante.estado,
-    Estado_monetario:aspirante.estado_monetario,
-    Fecha: aspirante.date_create,  
+    Estado_monetario: aspirante.estado_monetario,
+    Fecha: aspirante.date_create,
   }));
   const getVentasPorDia = () => {
     const ventasPorDia = {};
-  
+
     // Filtrar las ventas
-    const ventas = aspirantes.filter(aspirante => aspirante.estado === "venta");
-  
+    const ventas = aspirantes.filter(
+      (aspirante) => aspirante.estado === "venta"
+    );
+
     // Agrupar por fecha
-    ventas.forEach(venta => {
+    ventas.forEach((venta) => {
       const fecha = new Date(venta.date_create).toLocaleDateString("en-CA");
       const totalVenta = venta.precio_total; // Suponiendo que tienes este campo
-  
+
       if (!ventasPorDia[fecha]) {
         ventasPorDia[fecha] = 0;
       }
       ventasPorDia[fecha] += totalVenta;
     });
-  
+
     return ventasPorDia;
   };
-  
 
   // Filtrar los aspirantes según la fecha seleccionada y el término de búsqueda
   const filteredAspirantes = aspirantes.filter((aspirante) => {
     const searchTermLower = searchTerm.toLowerCase();
-    const aspiranteDate = new Date(aspirante.date_create).toLocaleDateString("en-CA"); // Formatear la fecha
+    const aspiranteDate = new Date(aspirante.date_create).toLocaleDateString(
+      "en-CA"
+    ); // Formatear la fecha
     const matchesDate = selectedDate ? aspiranteDate === selectedDate : true; // Filtrar por fecha
-    const matchesSearch = (
+    const matchesSearch =
       aspirante.nombre.toLowerCase().includes(searchTermLower) ||
       aspirante.identificacion.toLowerCase().includes(searchTermLower) ||
-      aspirante.telefono.includes(searchTermLower)
-    );
+      aspirante.telefono.includes(searchTermLower);
     return matchesDate && matchesSearch;
   });
 
-
   const calcularTotalPorFecha = () => {
     if (!selectedDate) return 0; // Si no hay fecha seleccionada, retornamos 0
-  
+
     const total = filteredAspirantes.reduce((acc, aspirante) => {
-      const aspiranteDate = new Date(aspirante.date_create).toLocaleDateString("en-CA");
-      return aspiranteDate === selectedDate ? acc + (aspirante.precio_total || 0) : acc; // Asegurarse de que precio_total esté definido
+      const aspiranteDate = new Date(aspirante.date_create).toLocaleDateString(
+        "en-CA"
+      );
+      return aspiranteDate === selectedDate
+        ? acc + (aspirante.precio_total || 0)
+        : acc; // Asegurarse de que precio_total esté definido
     }, 0);
-  
+
     return total;
   };
 
-  
-
   const ventasPorDia = getVentasPorDia();
 
- return (
+  return (
     <div className="aside-dashboard flex">
       <div>
         <NavLinks />
@@ -209,9 +214,14 @@ function DashboardListAspirant() {
 
           {/* Total del Día Seleccionado */}
           <div className="mb-6 p-4 border rounded-lg shadow-md bg-white">
-            <h2 className="text-xl font-bold mb-4">Total del Día Seleccionado</h2>
+            <h2 className="text-xl font-bold mb-4">
+              Total del Día Seleccionado
+            </h2>
             <span className="text-lg font-semibold">
-              {calcularTotalPorFecha().toLocaleString("es-CO", { style: "currency", currency: "COP" })}
+              {calcularTotalPorFecha().toLocaleString("es-CO", {
+                style: "currency",
+                currency: "COP",
+              })}
             </span>
           </div>
 
@@ -222,7 +232,12 @@ function DashboardListAspirant() {
               {Object.entries(ventasPorDia).map(([fecha, total]) => (
                 <li key={fecha} className="flex justify-between">
                   <span>{fecha}</span>
-                  <span>{total.toLocaleString("es-CO", { style: "currency", currency: "COP" })}</span>
+                  <span>
+                    {total.toLocaleString("es-CO", {
+                      style: "currency",
+                      currency: "COP",
+                    })}
+                  </span>
                 </li>
               ))}
             </ul>
@@ -230,7 +245,11 @@ function DashboardListAspirant() {
 
           {/* Input de fecha para filtrar */}
           <div className="mb-4 w-36">
-            <Label htmlFor="date_filter" value="Filtrar por fecha" className="text-lg font-bold mt-6 mb-4" />
+            <Label
+              htmlFor="date_filter"
+              value="Filtrar por fecha"
+              className="text-lg font-bold mt-6 mb-4"
+            />
             <TextInput
               id="date_filter"
               type="date"
@@ -258,79 +277,92 @@ function DashboardListAspirant() {
           </CSVLink>
 
           {/* Tabla de aspirantes */}
-          <div className="overflow-y-auto max-h-96 mt-4"> {/* Contenedor con scrollbar */}
-  <table className="tablita min-w-full bg-white border border-gray-300">
-    <thead>
-      <tr>
-        <th className="px-4 py-2 border">Nombre</th>
-        <th className="px-4 py-2 border">Identificación</th>
-        <th className="px-4 py-2 border">Teléfono</th>
+          <div className="overflow-y-auto max-h-96 mt-4">
+            {" "}
+            {/* Contenedor con scrollbar */}
+            <table className="tablita min-w-full bg-white border border-gray-300">
+              <thead>
+                <tr>
+                  <th className="px-4 py-2 border">Nombre</th>
+                  <th className="px-4 py-2 border">Identificación</th>
+                  <th className="px-4 py-2 border">Teléfono</th>
 
-        <th className="px-4 py-2 border">Tipo de Café</th>
-        <th className="px-4 py-2 border">Peso</th>
-        <th className="px-4 py-2 border">Precio</th>
-        <th className="px-4 py-2 border">Precio_total</th>
+                  <th className="px-4 py-2 border">Tipo de Café</th>
+                  <th className="px-4 py-2 border">Peso</th>
+                  <th className="px-4 py-2 border">Precio</th>
+                  <th className="px-4 py-2 border">Precio_total</th>
 
-        <th className="px-4 py-2 border">Estado</th>
-        <th className="px-4 py-2 border">Estado_mon</th>
+                  <th className="px-4 py-2 border">Estado</th>
+                  <th className="px-4 py-2 border">Estado_mon</th>
 
-        <th className="px-4 py-2 border">Fecha</th>
-        <th className="px-4 py-2 border">Acciones</th>
-      </tr>
-    </thead>
-    <tbody>
-      {filteredAspirantes.map((aspirante) => (
-        <tr key={aspirante._id}>
-          <td className="px-4 py-2 border">{aspirante.nombre}</td>
-          <td className="px-4 py-2 border">{aspirante.identificacion}</td>
-          <td className="px-4 py-2 border">{aspirante.telefono}</td>
+                  <th className="px-4 py-2 border">Fecha</th>
+                  <th className="px-4 py-2 border">Acciones</th>
+                </tr>
+              </thead>
+              <tbody>
+                {filteredAspirantes.map((aspirante) => (
+                  <tr key={aspirante._id}>
+                    <td className="px-4 py-2 border">{aspirante.nombre}</td>
+                    <td className="px-4 py-2 border">
+                      {aspirante.identificacion}
+                    </td>
+                    <td className="px-4 py-2 border">{aspirante.telefono}</td>
 
-          <td className="px-4 py-2 border">{aspirante.tipo_cafe}</td>
-          <td className="px-4 py-2 border">{aspirante.peso}g</td>
-          <td className="px-4 py-2 border">${aspirante.precio} </td>
-          <td className="px-4 py-2 border">${aspirante.precio_total} </td>
+                    <td className="px-4 py-2 border">{aspirante.tipo_cafe}</td>
+                    <td className="px-4 py-2 border">{aspirante.peso}g</td>
+                    <td className="px-4 py-2 border">${aspirante.precio} </td>
+                    <td className="px-4 py-2 border">
+                      ${aspirante.precio_total}{" "}
+                    </td>
 
-          <td className="px-4 py-2 border">{aspirante.estado}</td>
-          <td className="px-4 py-2 border">{aspirante.estado_monetario}</td>
+                    <td className="px-4 py-2 border">{aspirante.estado}</td>
+                    <td className="px-4 py-2 border">
+                      {aspirante.estado_monetario}
+                    </td>
 
-          <td className="px-4 py-2 border">{new Date(aspirante.date_create).toLocaleDateString()}</td>
-          <td className="px-4 py-2 border flex gap-5">
-            <Button onClick={() => handleEdit(aspirante)} className="mr-2" color="warning">
-              Editar
-            </Button>
-            <GeneradorPDF
-              id={aspirante._id}
-              nombre={aspirante.nombre}
-              telefono={aspirante.telefono}
-              tipo_cafe={aspirante.tipo_cafe}
-              peso={aspirante.peso}
-              precio={aspirante.precio}
-              estado={aspirante.estado}
-              date_create={aspirante.date_create}
-            />
-            <Button
-              onClick={() => {
-                setDeleteId(aspirante._id);
-                setShowDeleteModal(true);
-              }}
-              color="failure"
-            >
-              Eliminar
-            </Button>
-          </td>
-        </tr>
-      ))}
-    </tbody>
-  </table>
-</div>
+                    <td className="px-4 py-2 border">
+                      {new Date(aspirante.date_create).toLocaleDateString()}
+                    </td>
+                    <td className="px-4 py-2 border flex gap-5">
+                      <Button
+                        onClick={() => handleEdit(aspirante)}
+                        className="mr-2"
+                        color="warning"
+                      >
+                        Editar
+                      </Button>
+                      <GeneradorPDF
+                        id={aspirante._id}
+                        nombre={aspirante.nombre}
+                        telefono={aspirante.telefono}
+                        tipo_cafe={aspirante.tipo_cafe}
+                        peso={aspirante.peso}
+                        precio={aspirante.precio}
+                        estado={aspirante.estado}
+                        date_create={aspirante.date_create}
+                      />
+                      <Button
+                        onClick={() => {
+                          setDeleteId(aspirante._id);
+                          setShowDeleteModal(true);
+                        }}
+                        color="failure"
+                      >
+                        Eliminar
+                      </Button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         </div>
 
         {/* Modal para agregar y editar aspirantes */}
-        <Modal
-          show={showModal}
-          onClose={() => setShowModal(false)}
-        >
-          <Modal.Header>{editMode ? "Editar Aspirante" : "Agregar Aspirante"}</Modal.Header>
+        <Modal show={showModal} onClose={() => setShowModal(false)}>
+          <Modal.Header>
+            {editMode ? "Editar Aspirante" : "Agregar Aspirante"}
+          </Modal.Header>
           <Modal.Body>
             <form onSubmit={handleSubmit}>
               <div className="mb-4">
@@ -387,16 +419,16 @@ function DashboardListAspirant() {
                 />
               </div>
               <div className="mb-4">
-  <Label htmlFor="precio" value="Precio (COP)" />
-  <TextInput
-    id="precio"
-    type="text"
-    name="precio"
-    value={formData.precio}
-    onChange={handleInputChange} // Formateo aplicado aquí
-    required
-  />
-</div>
+                <Label htmlFor="precio" value="Precio (COP)" />
+                <TextInput
+                  id="precio"
+                  type="text"
+                  name="precio"
+                  value={formData.precio}
+                  onChange={handleInputChange} // Formateo aplicado aquí
+                  required
+                />
+              </div>
               <div className="mb-4">
                 <Label htmlFor="telefono" value="Teléfono" />
                 <TextInput
@@ -408,31 +440,63 @@ function DashboardListAspirant() {
                 />
               </div>
               <div className="mb-4">
-  <Label htmlFor="estado" value="Estado" />
-  <select
-    id="estado"
-    name="estado"
-    value={formData.estado}
-    onChange={handleInputChange}
-    required
-    className="form-select"
-  >
-    <option value="" disabled>Selecciona una opción</option>
-    <option value="compra">Compra</option>
-    <option value="venta">Venta</option>
-  </select>
-</div>
+                <Label htmlFor="estado" value="Estado" />
+                <select
+                  id="estado"
+                  name="estado"
+                  value={formData.estado}
+                  onChange={handleInputChange}
+                  required
+                  className="form-select"
+                >
+                  <option value="" disabled>
+                    Selecciona una opción
+                  </option>
+                  <option value="compra">Compra</option>
+                  <option value="venta">Venta</option>
+                </select>
+              </div>
+              <div className="mb-4">
+                <Label htmlFor="estado" value="Estado" />
+                <select
+                  id="estado"
+                  name="estado"
+                  value={formData.estado}
+                  onChange={handleInputChange}
+                  required
+                  className="form-select"
+                >
+                  <option value="" disabled>
+                    Selecciona una opción
+                  </option>
+                  <option value="compra">Compra</option>
+                  <option value="venta">Venta</option>
+                </select>
+                <select
+          id="estado_monetario"
+          name="estado_monetario"
+          value={formData.estado_monetario}
+          onChange={handleInputChange}
+          required
+          className="form-select"
+        >
+          <option value="" disabled>
+            Selecciona una opción
+          </option>
+          <option value="pagado">Pagado</option>
+          <option value="pendiente">Pendiente</option>
+        </select>
+              </div>
 
-              <Button type="submit" className=" botones_de">{editMode ? "Actualizar" : "Agregar"}</Button>
+              <Button type="submit" className=" botones_de">
+                {editMode ? "Actualizar" : "Agregar"}
+              </Button>
             </form>
           </Modal.Body>
         </Modal>
 
         {/* Modal de confirmación para eliminar */}
-        <Modal
-          show={showDeleteModal}
-          onClose={() => setShowDeleteModal(false)}
-        >
+        <Modal show={showDeleteModal} onClose={() => setShowDeleteModal(false)}>
           <Modal.Header>Confirmar Eliminación</Modal.Header>
           <Modal.Body>
             <p>¿Estás seguro de que deseas eliminar este aspirante?</p>
@@ -441,9 +505,7 @@ function DashboardListAspirant() {
             <Button color="failure" onClick={handleDelete}>
               Eliminar
             </Button>
-            <Button onClick={() => setShowDeleteModal(false)}>
-              Cancelar
-            </Button>
+            <Button onClick={() => setShowDeleteModal(false)}>Cancelar</Button>
           </Modal.Footer>
         </Modal>
       </div>
