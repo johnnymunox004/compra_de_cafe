@@ -18,17 +18,17 @@ function Dashboard() {
     return new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP' }).format(value);
   };
 
-  const [filteredAspirantes, setFilteredAspirantes] = useState([]);
   const [totalCompra, setTotalCompra] = useState(0);
   const [totalVenta, setTotalVenta] = useState(0);
   const [totalCafe, setTotalCafe] = useState(0);
   const [numeroCompras, setNumeroCompras] = useState(0);
   const [numeroVentas, setNumeroVentas] = useState(0);
   
-  // Estados para selector de semana específica
+  // Estados para selector de semana
   const [selectedYear, setSelectedYear] = useState(new Date().getFullYear());
   const [selectedMonth, setSelectedMonth] = useState(new Date().getMonth());
   const [selectedWeekOfMonth, setSelectedWeekOfMonth] = useState(1);
+  const [isCurrentWeek, setIsCurrentWeek] = useState(true);
 
   // Estado para la gráfica
   const [chartData, setChartData] = useState({
@@ -45,6 +45,17 @@ function Dashboard() {
   useEffect(() => {
     fetchAspirantes();
   }, [fetchAspirantes]);
+
+  // Función para obtener el rango de la semana actual
+  const getCurrentWeekRange = () => {
+    const now = new Date();
+    const startOfWeek = new Date(now.setDate(now.getDate() - now.getDay()));
+    startOfWeek.setHours(0, 0, 0, 0);
+    const endOfWeek = new Date(startOfWeek);
+    endOfWeek.setDate(startOfWeek.getDate() + 6);
+    endOfWeek.setHours(23, 59, 59, 999);
+    return { start: startOfWeek, end: endOfWeek };
+  };
 
   // Función para obtener el rango de fechas de una semana específica de un mes
   const getSpecificWeekRange = (year, month, weekOfMonth) => {
@@ -64,34 +75,35 @@ function Dashboard() {
     return { start: startDate, end: endDate };
   };
 
-  // Función para filtrar aspirantes por semana específica
-  const filterAspirantesBySpecificWeek = (aspirantesArray, year, month, weekOfMonth) => {
-    const { start, end } = getSpecificWeekRange(year, month, weekOfMonth);
+  // Función para filtrar aspirantes por rango de fechas
+  const filterAspirantesByDateRange = (aspirantesArray, start, end) => {
     return aspirantesArray.filter(aspirante => {
-      const aspiranteDate = new Date(aspirante.fecha); // Asumir que hay un campo fecha
+      const aspiranteDate = new Date(aspirante.date_create);
       return aspiranteDate >= start && aspiranteDate <= end;
     });
   };
 
   useEffect(() => {
     if (aspirantes.length > 0) {
-      // Filtrar aspirantes por semana específica
-      const filtered = filterAspirantesBySpecificWeek(
-        aspirantes, 
-        selectedYear, 
-        selectedMonth, 
-        selectedWeekOfMonth
-      );
+      // Determinar el rango de fechas para filtrar
+      let filtered;
+      if (isCurrentWeek) {
+        const { start, end } = getCurrentWeekRange();
+        filtered = filterAspirantesByDateRange(aspirantes, start, end);
+      } else {
+        const { start, end } = getSpecificWeekRange(selectedYear, selectedMonth, selectedWeekOfMonth);
+        filtered = filterAspirantesByDateRange(aspirantes, start, end);
+      }
 
       const processedAspirantes = filtered.map(aspirante => ({
-        id: aspirante.id,
+        id: aspirante._id,
         precio: parseFloat(aspirante.precio),
         estado: aspirante.estado,
         tipo_cafe: aspirante.tipo_cafe,
         peso: parseFloat(aspirante.peso),
       }));
 
-      // Calcular totales (similar al código anterior)
+      // Calcular totales
       const totalCompra = processedAspirantes
         .filter(aspirante => aspirante.estado === "compra")
         .reduce((acc, aspirante) => acc + (aspirante.precio || 0), 0);
@@ -141,7 +153,7 @@ function Dashboard() {
       setNumeroVentas(0);
       setChartData({ labels: [], datasets: [] });
     }
-  }, [aspirantes, selectedYear, selectedMonth, selectedWeekOfMonth]);
+  }, [aspirantes, selectedYear, selectedMonth, selectedWeekOfMonth, isCurrentWeek]);
 
   // Generar años desde 2020 hasta el actual
   const years = Array.from(
@@ -170,43 +182,64 @@ function Dashboard() {
       <div className="main-dashboard">
         <h1 className="font-bold text-3xl">Almacen</h1>
 
-        {/* Selectores para semana específica */}
-        <div className="week-specific-selector mb-4 flex space-x-2">
-          <select 
-            value={selectedYear} 
-            onChange={(e) => setSelectedYear(parseInt(e.target.value))}
-            className="p-2 border rounded"
+        {/* Botón de semana actual */}
+        <div className="week-selector mb-4 flex space-x-2">
+          <button 
+            onClick={() => setIsCurrentWeek(true)}
+            className={`px-4 py-2 rounded ${isCurrentWeek ? 'bg-blue-500 text-white' : 'bg-gray-200'}`}
           >
-            {years.map(year => (
-              <option key={year} value={year}>{year}</option>
-            ))}
-          </select>
-
-          <select 
-            value={selectedMonth} 
-            onChange={(e) => setSelectedMonth(parseInt(e.target.value))}
-            className="p-2 border rounded"
+            Semana Actual
+          </button>
+          <button 
+            onClick={() => setIsCurrentWeek(false)}
+            className={`px-4 py-2 rounded ${!isCurrentWeek ? 'bg-blue-500 text-white' : 'bg-gray-200'}`}
           >
-            {months.map((month, index) => (
-              <option key={month} value={index}>{month}</option>
-            ))}
-          </select>
-
-          <select 
-            value={selectedWeekOfMonth} 
-            onChange={(e) => setSelectedWeekOfMonth(parseInt(e.target.value))}
-            className="p-2 border rounded"
-          >
-            {weeks.map(week => (
-              <option key={week} value={week}>Semana {week}</option>
-            ))}
-          </select>
+            Semana Específica
+          </button>
         </div>
 
-        {/* Mostrar rango de fechas de la semana seleccionada */}
+        {/* Selectores para semana específica (solo visibles cuando no está en semana actual) */}
+        {!isCurrentWeek && (
+          <div className="week-specific-selector mb-4 flex space-x-2">
+            <select 
+              value={selectedYear} 
+              onChange={(e) => setSelectedYear(parseInt(e.target.value))}
+              className="p-2 border rounded"
+            >
+              {years.map(year => (
+                <option key={year} value={year}>{year}</option>
+              ))}
+            </select>
+
+            <select 
+              value={selectedMonth} 
+              onChange={(e) => setSelectedMonth(parseInt(e.target.value))}
+              className="p-2 border rounded"
+            >
+              {months.map((month, index) => (
+                <option key={month} value={index}>{month}</option>
+              ))}
+            </select>
+
+            <select 
+              value={selectedWeekOfMonth} 
+              onChange={(e) => setSelectedWeekOfMonth(parseInt(e.target.value))}
+              className="p-2 border rounded"
+            >
+              {weeks.map(week => (
+                <option key={week} value={week}>Semana {week}</option>
+              ))}
+            </select>
+          </div>
+        )}
+
+        {/* Mostrar rango de fechas */}
         <div className="week-label mb-4">
           <p className="text-lg font-semibold">
-            {`Semana ${selectedWeekOfMonth} de ${months[selectedMonth]} ${selectedYear}`}
+            {isCurrentWeek 
+              ? 'Semana Actual' 
+              : `Semana ${selectedWeekOfMonth} de ${months[selectedMonth]} ${selectedYear}`
+            }
           </p>
         </div>
 
