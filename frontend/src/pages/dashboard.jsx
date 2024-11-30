@@ -24,7 +24,11 @@ function Dashboard() {
   const [totalCafe, setTotalCafe] = useState(0);
   const [numeroCompras, setNumeroCompras] = useState(0);
   const [numeroVentas, setNumeroVentas] = useState(0);
-  const [selectedWeek, setSelectedWeek] = useState(null);
+  
+  // Estados para selector de semana específica
+  const [selectedYear, setSelectedYear] = useState(new Date().getFullYear());
+  const [selectedMonth, setSelectedMonth] = useState(new Date().getMonth());
+  const [selectedWeekOfMonth, setSelectedWeekOfMonth] = useState(1);
 
   // Estado para la gráfica
   const [chartData, setChartData] = useState({
@@ -42,32 +46,42 @@ function Dashboard() {
     fetchAspirantes();
   }, [fetchAspirantes]);
 
-  // Función para obtener el rango de fechas de una semana específica
-  const getWeekRange = (weekOffset = 0) => {
-    const now = new Date();
-    const startOfWeek = new Date(now.setDate(now.getDate() - now.getDay() + (weekOffset * 7)));
-    startOfWeek.setHours(0, 0, 0, 0);
-    const endOfWeek = new Date(startOfWeek);
-    endOfWeek.setDate(startOfWeek.getDate() + 6);
-    endOfWeek.setHours(23, 59, 59, 999);
-    return { start: startOfWeek, end: endOfWeek };
+  // Función para obtener el rango de fechas de una semana específica de un mes
+  const getSpecificWeekRange = (year, month, weekOfMonth) => {
+    const firstDayOfMonth = new Date(year, month, 1);
+    const firstDayOfWeek = new Date(firstDayOfMonth);
+    
+    // Ajustar al primer día de la primera semana
+    firstDayOfWeek.setDate(firstDayOfWeek.getDate() + (firstDayOfMonth.getDay() === 0 ? 0 : 7 - firstDayOfMonth.getDay()));
+    
+    // Calcular el inicio de la semana específica
+    const startDate = new Date(firstDayOfWeek);
+    startDate.setDate(startDate.getDate() + ((weekOfMonth - 1) * 7));
+    
+    const endDate = new Date(startDate);
+    endDate.setDate(endDate.getDate() + 6);
+    
+    return { start: startDate, end: endDate };
   };
 
-  // Función para filtrar aspirantes por semana
-  const filterAspirantesByWeek = (aspirantesArray, weekOffset = 0) => {
-    const { start, end } = getWeekRange(weekOffset);
+  // Función para filtrar aspirantes por semana específica
+  const filterAspirantesBySpecificWeek = (aspirantesArray, year, month, weekOfMonth) => {
+    const { start, end } = getSpecificWeekRange(year, month, weekOfMonth);
     return aspirantesArray.filter(aspirante => {
-      const aspiranteDate = new Date(aspirante.fecha); // Assuming there's a 'fecha' field
+      const aspiranteDate = new Date(aspirante.fecha); // Asumir que hay un campo fecha
       return aspiranteDate >= start && aspiranteDate <= end;
     });
   };
 
   useEffect(() => {
     if (aspirantes.length > 0) {
-      // Filtrar aspirantes por semana si se ha seleccionado
-      const filtered = selectedWeek !== null 
-        ? filterAspirantesByWeek(aspirantes, selectedWeek)
-        : aspirantes;
+      // Filtrar aspirantes por semana específica
+      const filtered = filterAspirantesBySpecificWeek(
+        aspirantes, 
+        selectedYear, 
+        selectedMonth, 
+        selectedWeekOfMonth
+      );
 
       const processedAspirantes = filtered.map(aspirante => ({
         id: aspirante.id,
@@ -77,7 +91,7 @@ function Dashboard() {
         peso: parseFloat(aspirante.peso),
       }));
 
-      // Actualizar totales
+      // Calcular totales (similar al código anterior)
       const totalCompra = processedAspirantes
         .filter(aspirante => aspirante.estado === "compra")
         .reduce((acc, aspirante) => acc + (aspirante.precio || 0), 0);
@@ -127,13 +141,22 @@ function Dashboard() {
       setNumeroVentas(0);
       setChartData({ labels: [], datasets: [] });
     }
-  }, [aspirantes, selectedWeek]);
+  }, [aspirantes, selectedYear, selectedMonth, selectedWeekOfMonth]);
 
-  // Función para obtener el texto descriptivo de la semana
-  const getWeekLabel = (weekOffset) => {
-    const { start, end } = getWeekRange(weekOffset);
-    return `Semana del ${start.toLocaleDateString()} al ${end.toLocaleDateString()}`;
-  };
+  // Generar años desde 2020 hasta el actual
+  const years = Array.from(
+    { length: new Date().getFullYear() - 2020 + 1 }, 
+    (_, i) => 2020 + i
+  );
+
+  // Meses en español
+  const months = [
+    'Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 
+    'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'
+  ];
+
+  // Generar semanas (1-5)
+  const weeks = [1, 2, 3, 4, 5];
 
   if (loading) return <div>Cargando...</div>;
   if (error) return <div>Error: {error}</div>;
@@ -147,32 +170,47 @@ function Dashboard() {
       <div className="main-dashboard">
         <h1 className="font-bold text-3xl">Almacen</h1>
 
-        {/* Botones de selección de semana */}
-        <div className="week-selector mb-4">
-          <button 
-            className={`mr-2 px-4 py-2 rounded ${selectedWeek === null ? 'bg-blue-500 text-white' : 'bg-gray-200'}`}
-            onClick={() => setSelectedWeek(null)}
+        {/* Selectores para semana específica */}
+        <div className="week-specific-selector mb-4 flex space-x-2">
+          <select 
+            value={selectedYear} 
+            onChange={(e) => setSelectedYear(parseInt(e.target.value))}
+            className="p-2 border rounded"
           >
-            Todas las semanas
-          </button>
-          {[-1, 0, 1].map((weekOffset) => (
-            <button
-              key={weekOffset}
-              className={`mr-2 px-4 py-2 rounded ${selectedWeek === weekOffset ? 'bg-blue-500 text-white' : 'bg-gray-200'}`}
-              onClick={() => setSelectedWeek(weekOffset)}
-            >
-              {weekOffset < 0 ? 'Semana anterior' : weekOffset === 0 ? 'Semana actual' : 'Próxima semana'}
-            </button>
-          ))}
+            {years.map(year => (
+              <option key={year} value={year}>{year}</option>
+            ))}
+          </select>
+
+          <select 
+            value={selectedMonth} 
+            onChange={(e) => setSelectedMonth(parseInt(e.target.value))}
+            className="p-2 border rounded"
+          >
+            {months.map((month, index) => (
+              <option key={month} value={index}>{month}</option>
+            ))}
+          </select>
+
+          <select 
+            value={selectedWeekOfMonth} 
+            onChange={(e) => setSelectedWeekOfMonth(parseInt(e.target.value))}
+            className="p-2 border rounded"
+          >
+            {weeks.map(week => (
+              <option key={week} value={week}>Semana {week}</option>
+            ))}
+          </select>
         </div>
 
-        {/* Mostrar la semana seleccionada */}
-        {selectedWeek !== null && (
-          <div className="week-label mb-4">
-            <p className="text-lg font-semibold">{getWeekLabel(selectedWeek)}</p>
-          </div>
-        )}
+        {/* Mostrar rango de fechas de la semana seleccionada */}
+        <div className="week-label mb-4">
+          <p className="text-lg font-semibold">
+            {`Semana ${selectedWeekOfMonth} de ${months[selectedMonth]} ${selectedYear}`}
+          </p>
+        </div>
 
+        {/* Resto del código de Dashboard igual que antes */}
         <div className="targeta">
           <div className="card">
             <h2 className="card-title">Total Comprado</h2>
