@@ -14,12 +14,21 @@ function Dashboard() {
     error,
   } = useAspirantesStore();
 
-  // Debug log for store
-  console.log('Aspirantes Store:', {
-    aspirantes,
-    loading,
-    error
-  });
+  // Llamar a fetchAspirantes cuando el componente se monta
+  useEffect(() => {
+    fetchAspirantes();
+  }, []);
+
+  // Debug log para store
+  useEffect(() => {
+    console.log('Aspirantes Store:', {
+      aspirantes,
+      loading,
+      error
+    });
+  }, [aspirantes, loading, error]);
+
+  // Resto del código permanece igual...
 
   const formatCurrency = (value) => {
     return new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP' }).format(value);
@@ -99,14 +108,6 @@ function Dashboard() {
       endDate.setDate(lastDayOfMonth.getDate());
     }
     
-    console.log('Week Date Range:', {
-      start: startDate,
-      end: endDate,
-      year,
-      month,
-      weekOfMonth
-    });
-    
     return { 
       start: startDate, 
       end: endDate 
@@ -115,47 +116,21 @@ function Dashboard() {
 
   // Filtrar aspirantes por semana
   const filterAspirantesByWeek = (aspirantesArray, year, month, weekOfMonth) => {
-    console.log('Filtering Aspirantes:', {
-      aspirantesArray,
-      year,
-      month,
-      weekOfMonth
-    });
-
     const { start, end } = getWeekDateRange(year, month, weekOfMonth);
     
-    const filteredAspirantes = aspirantesArray.filter(aspirante => {
+    return aspirantesArray.filter(aspirante => {
       // Parsear fecha del aspirante
       const fechaAspirante = new Date(aspirante.date_create || aspirante.fecha);
       
-      console.log('Aspirante Date Check:', {
-        aspirante,
-        fechaAspirante,
-        start,
-        end,
-        isValid: !isNaN(fechaAspirante.getTime()),
-        inRange: fechaAspirante >= start && fechaAspirante <= end
-      });
-
       // Verificar si la fecha es válida y está dentro del rango de la semana
       return !isNaN(fechaAspirante.getTime()) && 
              fechaAspirante >= start && 
              fechaAspirante <= end;
     });
-
-    console.log('Filtered Aspirantes:', filteredAspirantes);
-    return filteredAspirantes;
   };
 
   // Efecto para preparar datos cuando cambian los aspirantes o la semana seleccionada
   useEffect(() => {
-    console.log('UseEffect Triggered:', {
-      aspirantesLength: aspirantes.length,
-      selectedYear,
-      selectedMonth,
-      selectedWeekOfMonth
-    });
-
     if (aspirantes.length > 0) {
       // Filtrar aspirantes de la semana seleccionada
       const filteredAspirantes = filterAspirantesByWeek(
@@ -164,8 +139,6 @@ function Dashboard() {
         selectedMonth, 
         selectedWeekOfMonth
       );
-
-      console.log('Filtered Aspirantes in UseEffect:', filteredAspirantes);
 
       // Calcular resumen semanal
       const summary = {
@@ -190,8 +163,6 @@ function Dashboard() {
 
       // Procesar cada aspirante filtrado
       filteredAspirantes.forEach(aspirante => {
-        console.log('Processing Aspirante:', aspirante);
-
         const peso = parseFloat(aspirante.peso) || 0;
         const precio = parseFloat(aspirante.precio) || 0;
         const precioTotal = parseFloat(aspirante.precio_total) || 0;
@@ -217,19 +188,12 @@ function Dashboard() {
         }
       });
 
-      console.log('Weekly Summary:', summary);
-
       // Actualizar estado con el resumen
       setWeeklySummary(summary);
 
       // Preparar datos para la gráfica
       const chartLabels = Object.keys(summary.tiposCafe);
       const chartData = Object.values(summary.tiposCafe);
-
-      console.log('Chart Data:', {
-        labels: chartLabels,
-        data: chartData
-      });
 
       setChartData({
         labels: chartLabels,
@@ -242,19 +206,34 @@ function Dashboard() {
     }
   }, [aspirantes, selectedYear, selectedMonth, selectedWeekOfMonth]);
 
-  // Resto del código permanece igual...
-  
-  // Agregar un useEffect para depuración inicial
-  useEffect(() => {
-    console.log('Initial Render - Current State:', {
-      selectedYear,
-      selectedMonth,
-      selectedWeekOfMonth,
-      aspirantesLength: aspirantes.length
-    });
-  }, []);
+  // Renderizado condicional para manejar estado de carga y errores
+  if (loading) return <div>Cargando...</div>;
+  if (error) return <div>Error: {error.message}</div>;
+  if (aspirantes.length === 0) return <div>No hay datos disponibles</div>;
 
-  // El resto del componente permanece igual...
+  return (
+    <div>
+      {/* Aquí agregarías la renderización de tu dashboard */}
+      <h1>Dashboard de Aspirantes</h1>
+      {/* Ejemplo de renderización de gráfica */}
+      <Bar 
+        data={chartData}
+        options={{
+          responsive: true,
+          plugins: {
+            legend: {
+              position: 'top',
+            },
+            title: {
+              display: true,
+              text: 'Gramos por Tipo de Café'
+            }
+          }
+        }}
+      />
+      {/* Agregar más elementos del dashboard según necesites */}
+    </div>
+  );
 }
 
 export default Dashboard;
