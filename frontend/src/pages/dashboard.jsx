@@ -18,7 +18,6 @@ function Dashboard() {
     return new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP' }).format(value);
   };
 
-  const [filteredAspirantes, setFilteredAspirantes] = useState([]);
   const [totalCompra, setTotalCompra] = useState(0);
   const [totalVenta, setTotalVenta] = useState(0);
   const [totalCafe, setTotalCafe] = useState(0);
@@ -42,36 +41,73 @@ function Dashboard() {
     ],
   });
 
-  useEffect(() => {
-    fetchAspirantes();
-  }, [fetchAspirantes]);
-
   // Función para obtener el rango de fechas de una semana específica de un mes
   const getSpecificWeekRange = (year, month, weekOfMonth) => {
     const firstDayOfMonth = new Date(year, month, 1);
-    const firstDayOfWeek = new Date(firstDayOfMonth);
+    const lastDayOfMonth = new Date(year, month + 1, 0);
     
-    // Ajustar al primer día de la primera semana
-    firstDayOfWeek.setDate(firstDayOfWeek.getDate() + (firstDayOfMonth.getDay() === 0 ? 0 : 7 - firstDayOfMonth.getDay()));
+    // Calcular el primer día de la semana especificada
+    const startDate = new Date(year, month, 1 + (weekOfMonth - 1) * 7);
     
-    // Calcular el inicio de la semana específica
-    const startDate = new Date(firstDayOfWeek);
-    startDate.setDate(startDate.getDate() + ((weekOfMonth - 1) * 7));
+    // Ajustar la fecha de inicio si cae antes del primer día del mes
+    while (startDate.getMonth() !== month) {
+      startDate.setDate(startDate.getDate() + 1);
+    }
     
+    // Calcular la fecha final (6 días después o hasta el último día del mes)
     const endDate = new Date(startDate);
     endDate.setDate(endDate.getDate() + 6);
     
-    return { start: startDate, end: endDate };
+    // Asegurar que no se exceda del último día del mes
+    if (endDate > lastDayOfMonth) {
+      endDate.setDate(lastDayOfMonth.getDate());
+    }
+    
+    return { 
+      start: startDate, 
+      end: endDate 
+    };
   };
 
   // Función para filtrar aspirantes por semana específica
   const filterAspirantesBySpecificWeek = (aspirantesArray, year, month, weekOfMonth) => {
     const { start, end } = getSpecificWeekRange(year, month, weekOfMonth);
+    
     return aspirantesArray.filter(aspirante => {
-      const aspiranteDate = new Date(aspirante.fecha); // Asumir que hay un campo fecha
+      // Manejar diferentes formatos de fecha
+      let aspiranteDate;
+      
+      // Intentar parsear la fecha de múltiples formas
+      if (aspirante.fecha instanceof Date) {
+        aspiranteDate = aspirante.fecha;
+      } else if (typeof aspirante.fecha === 'string') {
+        // Intentar parsear diferentes formatos de fecha
+        aspiranteDate = new Date(aspirante.fecha);
+        
+        // Si el string es en formato "YYYY-MM-DD"
+        if (isNaN(aspiranteDate.getTime()) && /^\d{4}-\d{2}-\d{2}$/.test(aspirante.fecha)) {
+          const [year, month, day] = aspirante.fecha.split('-').map(Number);
+          aspiranteDate = new Date(year, month - 1, day);
+        }
+      } else if (typeof aspirante.fecha === 'number') {
+        // Si es un timestamp
+        aspiranteDate = new Date(aspirante.fecha);
+      }
+      
+      // Verificar si la fecha es válida
+      if (!aspiranteDate || isNaN(aspiranteDate.getTime())) {
+        console.warn('Fecha inválida:', aspirante.fecha);
+        return false;
+      }
+      
+      // Comparar fechas
       return aspiranteDate >= start && aspiranteDate <= end;
     });
   };
+
+  useEffect(() => {
+    fetchAspirantes();
+  }, [fetchAspirantes]);
 
   useEffect(() => {
     if (aspirantes.length > 0) {
@@ -83,33 +119,38 @@ function Dashboard() {
         selectedWeekOfMonth
       );
 
+      // Agregar un log para depuración
+      console.log('Filtered Aspirantes:', filtered);
+
       const processedAspirantes = filtered.map(aspirante => ({
         id: aspirante.id,
-        precio: parseFloat(aspirante.precio),
+        precio: parseFloat(aspirante.precio || 0),
         estado: aspirante.estado,
         tipo_cafe: aspirante.tipo_cafe,
-        peso: parseFloat(aspirante.peso),
+        peso: parseFloat(aspirante.peso || 0),
+        fecha: aspirante.fecha // Mantener la fecha para depuración
       }));
 
-      // Calcular totales (similar al código anterior)
+      // Calcular totales
       const totalCompra = processedAspirantes
         .filter(aspirante => aspirante.estado === "compra")
-        .reduce((acc, aspirante) => acc + (aspirante.precio || 0), 0);
+        .reduce((acc, aspirante) => acc + aspirante.precio, 0);
 
       const totalVenta = processedAspirantes
         .filter(aspirante => aspirante.estado === "venta")
-        .reduce((acc, aspirante) => acc + (aspirante.precio || 0), 0);
+        .reduce((acc, aspirante) => acc + aspirante.precio, 0);
 
       const totalCafe = processedAspirantes
         .filter(aspirante => aspirante.estado === "compra")
-        .reduce((acc, aspirante) => acc + (aspirante.peso || 0), 0) -
+        .reduce((acc, aspirante) => acc + aspirante.peso, 0) -
         processedAspirantes
         .filter(aspirante => aspirante.estado === "venta")
-        .reduce((acc, aspirante) => acc + (aspirante.peso || 0), 0);
+        .reduce((acc, aspirante) => acc + aspirante.peso, 0);
 
       const numeroCompras = processedAspirantes.filter(aspirante => aspirante.estado === "compra").length;
       const numeroVentas = processedAspirantes.filter(aspirante => aspirante.estado === "venta").length;
 
+      // Actualizar estados
       setTotalCompra(totalCompra);
       setTotalVenta(totalVenta);
       setTotalCafe(totalCafe);
@@ -121,7 +162,7 @@ function Dashboard() {
       const weights = coffeeTypes.map(type => {
         return processedAspirantes
           .filter(aspirante => aspirante.tipo_cafe === type)
-          .reduce((acc, aspirante) => acc + (aspirante.peso || 0), 0);
+          .reduce((acc, aspirante) => acc + aspirante.peso, 0);
       });
 
       setChartData({
@@ -210,7 +251,7 @@ function Dashboard() {
           </p>
         </div>
 
-        {/* Resto del código de Dashboard igual que antes */}
+        {/* Tarjetas de resumen */}
         <div className="targeta">
           <div className="card">
             <h2 className="card-title">Total Comprado</h2>
@@ -224,7 +265,7 @@ function Dashboard() {
 
           <div className="card">
             <h2 className="card-title">Café Disponible</h2>
-            <p className="card-content">{totalCafe} kg</p>
+            <p className="card-content">{totalCafe.toFixed(2)} kg</p>
           </div>
 
           <div className="card">
