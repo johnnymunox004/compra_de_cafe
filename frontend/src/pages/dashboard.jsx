@@ -29,7 +29,7 @@ function Dashboard() {
   // Estados para selector de semana
   const [selectedYear, setSelectedYear] = useState(new Date().getFullYear());
   const [selectedMonth, setSelectedMonth] = useState(new Date().getMonth());
-  const [selectedWeekOfMonth, setSelectedWeekOfMonth] = useState(5);
+  const [selectedWeekOfMonth, setSelectedWeekOfMonth] = useState(getCurrentWeek());
 
   // Estado para la gráfica
   const [chartData, setChartData] = useState({
@@ -42,6 +42,16 @@ function Dashboard() {
       },
     ],
   });
+
+  // Función para obtener la semana actual del mes
+  function getCurrentWeek() {
+    const today = new Date();
+    const currentMonth = today.getMonth();
+    const currentDate = today.getDate();
+    
+    // Calcular en qué semana está el día actual
+    return Math.ceil(currentDate / 7);
+  }
 
   // Función para obtener rango de fechas de una semana específica
   const getWeekDateRange = (year, month, weekOfMonth) => {
@@ -153,6 +163,21 @@ function Dashboard() {
     }
   }, [aspirantes, selectedYear, selectedMonth, selectedWeekOfMonth]);
 
+  // Manejar búsqueda de semana
+  const handleSearchWeek = () => {
+    // La lógica de filtrado ya está en el useEffect
+    // Solo necesitamos asegurarnos de que los estados estén actualizados
+    console.log(`Buscando datos para la semana ${selectedWeekOfMonth} de ${months[selectedMonth]} ${selectedYear}`);
+  };
+
+  // Seleccionar semana actual
+  const handleCurrentWeek = () => {
+    const now = new Date();
+    setSelectedYear(now.getFullYear());
+    setSelectedMonth(now.getMonth());
+    setSelectedWeekOfMonth(getCurrentWeek());
+  };
+
   // Años disponibles
   const years = Array.from(
     { length: new Date().getFullYear() - 2020 + 1 }, 
@@ -211,6 +236,22 @@ function Dashboard() {
               <option key={week} value={week}>Semana {week}</option>
             ))}
           </select>
+
+          {/* Botones de acción */}
+          <div className="flex space-x-2">
+            <button 
+              onClick={handleSearchWeek}
+              className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
+            >
+              Buscar
+            </button>
+            <button 
+              onClick={handleCurrentWeek}
+              className="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600"
+            >
+              Semana Actual
+            </button>
+          </div>
         </div>
 
         {/* Resumen semanal */}
