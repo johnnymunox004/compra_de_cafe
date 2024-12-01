@@ -18,43 +18,45 @@ function Dashboard() {
     return new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP' }).format(value);
   };
 
-  const [totalCompra, setTotalCompra] = useState(0);
-  const [totalVenta, setTotalVenta] = useState(0);
-  const [totalCafe, setTotalCafe] = useState(0);
-  const [numeroCompras, setNumeroCompras] = useState(0);
-  const [numeroVentas, setNumeroVentas] = useState(0);
-  
-  // Estados para selector de semana específica
+  // Estados para resumen semanal
+  const [weeklySummary, setWeeklySummary] = useState({
+    totalCompra: 0,
+    totalVenta: 0,
+    totalGramos: 0,
+    tiposCafe: {}
+  });
+
+  // Estados para selector de semana
   const [selectedYear, setSelectedYear] = useState(new Date().getFullYear());
   const [selectedMonth, setSelectedMonth] = useState(new Date().getMonth());
-  const [selectedWeekOfMonth, setSelectedWeekOfMonth] = useState(1);
+  const [selectedWeekOfMonth, setSelectedWeekOfMonth] = useState(5);
 
   // Estado para la gráfica
   const [chartData, setChartData] = useState({
     labels: [],
     datasets: [
       {
-        label: 'Peso de café (kg)',
+        label: 'Gramos por Tipo de Café',
         data: [],
         backgroundColor: 'rgba(75, 192, 192, 0.6)',
       },
     ],
   });
 
-  // Función para obtener el rango de fechas de una semana específica de un mes
-  const getSpecificWeekRange = (year, month, weekOfMonth) => {
+  // Función para obtener rango de fechas de una semana específica
+  const getWeekDateRange = (year, month, weekOfMonth) => {
     const firstDayOfMonth = new Date(year, month, 1);
     const lastDayOfMonth = new Date(year, month + 1, 0);
     
-    // Calcular el primer día de la semana especificada
+    // Calcular inicio de la semana
     const startDate = new Date(year, month, 1 + (weekOfMonth - 1) * 7);
     
-    // Ajustar la fecha de inicio si cae antes del primer día del mes
+    // Ajustar si cae antes del primer día del mes
     while (startDate.getMonth() !== month) {
       startDate.setDate(startDate.getDate() + 1);
     }
     
-    // Calcular la fecha final (6 días después o hasta el último día del mes)
+    // Calcular fecha final
     const endDate = new Date(startDate);
     endDate.setDate(endDate.getDate() + 6);
     
@@ -69,122 +71,89 @@ function Dashboard() {
     };
   };
 
-  // Función para filtrar aspirantes por semana específica
-  const filterAspirantesBySpecificWeek = (aspirantesArray, year, month, weekOfMonth) => {
-    const { start, end } = getSpecificWeekRange(year, month, weekOfMonth);
+  // Filtrar aspirantes por semana
+  const filterAspirantesByWeek = (aspirantesArray, year, month, weekOfMonth) => {
+    const { start, end } = getWeekDateRange(year, month, weekOfMonth);
     
     return aspirantesArray.filter(aspirante => {
-      // Manejar diferentes formatos de fecha
-      let aspiranteDate;
+      // Parsear fecha del aspirante
+      const fechaAspirante = new Date(aspirante.fecha);
       
-      // Intentar parsear la fecha de múltiples formas
-      if (aspirante.fecha instanceof Date) {
-        aspiranteDate = aspirante.fecha;
-      } else if (typeof aspirante.fecha === 'string') {
-        // Intentar parsear diferentes formatos de fecha
-        aspiranteDate = new Date(aspirante.fecha);
-        
-        // Si el string es en formato "YYYY-MM-DD"
-        if (isNaN(aspiranteDate.getTime()) && /^\d{4}-\d{2}-\d{2}$/.test(aspirante.fecha)) {
-          const [year, month, day] = aspirante.fecha.split('-').map(Number);
-          aspiranteDate = new Date(year, month - 1, day);
-        }
-      } else if (typeof aspirante.fecha === 'number') {
-        // Si es un timestamp
-        aspiranteDate = new Date(aspirante.fecha);
-      }
-      
-      // Verificar si la fecha es válida
-      if (!aspiranteDate || isNaN(aspiranteDate.getTime())) {
-        console.warn('Fecha inválida:', aspirante.fecha);
-        return false;
-      }
-      
-      // Comparar fechas
-      return aspiranteDate >= start && aspiranteDate <= end;
+      // Verificar si la fecha es válida y está dentro del rango de la semana
+      return !isNaN(fechaAspirante.getTime()) && 
+             fechaAspirante >= start && 
+             fechaAspirante <= end;
     });
   };
 
-  useEffect(() => {
-    fetchAspirantes();
-  }, [fetchAspirantes]);
-
+  // Preparar datos cuando cambian los aspirantes o la semana seleccionada
   useEffect(() => {
     if (aspirantes.length > 0) {
-      // Filtrar aspirantes por semana específica
-      const filtered = filterAspirantesBySpecificWeek(
+      // Filtrar aspirantes de la semana seleccionada
+      const filteredAspirantes = filterAspirantesByWeek(
         aspirantes, 
         selectedYear, 
         selectedMonth, 
         selectedWeekOfMonth
       );
 
-      // Agregar un log para depuración
-      console.log('Filtered Aspirantes:', filtered);
+      // Calcular resumen semanal
+      const summary = {
+        totalCompra: 0,
+        totalVenta: 0,
+        totalGramos: 0,
+        tiposCafe: {}
+      };
 
-      const processedAspirantes = filtered.map(aspirante => ({
-        id: aspirante.id,
-        precio: parseFloat(aspirante.precio || 0),
-        estado: aspirante.estado,
-        tipo_cafe: aspirante.tipo_cafe,
-        peso: parseFloat(aspirante.peso || 0),
-        fecha: aspirante.fecha // Mantener la fecha para depuración
-      }));
+      // Tipos de café predefinidos
+      const coffeeTypes = [
+        'seco', 'Caturra', 'Variedad Colombia', 'F6', 
+        'Borboun Rosado', 'Geishar', 'Tabi', 'Variedad Castillo'
+      ];
 
-      // Calcular totales
-      const totalCompra = processedAspirantes
-        .filter(aspirante => aspirante.estado === "compra")
-        .reduce((acc, aspirante) => acc + aspirante.precio, 0);
-
-      const totalVenta = processedAspirantes
-        .filter(aspirante => aspirante.estado === "venta")
-        .reduce((acc, aspirante) => acc + aspirante.precio, 0);
-
-      const totalCafe = processedAspirantes
-        .filter(aspirante => aspirante.estado === "compra")
-        .reduce((acc, aspirante) => acc + aspirante.peso, 0) -
-        processedAspirantes
-        .filter(aspirante => aspirante.estado === "venta")
-        .reduce((acc, aspirante) => acc + aspirante.peso, 0);
-
-      const numeroCompras = processedAspirantes.filter(aspirante => aspirante.estado === "compra").length;
-      const numeroVentas = processedAspirantes.filter(aspirante => aspirante.estado === "venta").length;
-
-      // Actualizar estados
-      setTotalCompra(totalCompra);
-      setTotalVenta(totalVenta);
-      setTotalCafe(totalCafe);
-      setNumeroCompras(numeroCompras);
-      setNumeroVentas(numeroVentas);
-
-      // Calcular datos para la gráfica
-      const coffeeTypes = ['seco','Caturra', 'Variedad Colombia', 'F6', 'Borboun Rosado', 'Geishar', 'Tabi', 'Variedad Castillo'];
-      const weights = coffeeTypes.map(type => {
-        return processedAspirantes
-          .filter(aspirante => aspirante.tipo_cafe === type)
-          .reduce((acc, aspirante) => acc + aspirante.peso, 0);
+      // Inicializar tipos de café en 0
+      coffeeTypes.forEach(type => {
+        summary.tiposCafe[type] = 0;
       });
 
+      // Procesar cada aspirante filtrado
+      filteredAspirantes.forEach(aspirante => {
+        const peso = parseFloat(aspirante.peso) || 0;
+        const precio = parseFloat(aspirante.precio) || 0;
+
+        if (aspirante.estado === 'compra') {
+          summary.totalCompra += precio;
+          summary.totalGramos += peso;
+          
+          // Acumular gramos por tipo de café
+          if (summary.tiposCafe.hasOwnProperty(aspirante.tipo_cafe)) {
+            summary.tiposCafe[aspirante.tipo_cafe] += peso;
+          }
+        } else if (aspirante.estado === 'venta') {
+          summary.totalVenta += precio;
+          summary.totalGramos -= peso;
+        }
+      });
+
+      // Actualizar estado con el resumen
+      setWeeklySummary(summary);
+
+      // Preparar datos para la gráfica
+      const chartLabels = Object.keys(summary.tiposCafe);
+      const chartData = Object.values(summary.tiposCafe);
+
       setChartData({
-        labels: coffeeTypes,
+        labels: chartLabels,
         datasets: [{
-          label: 'Peso de café (kg)',
-          data: weights,
+          label: 'Gramos por Tipo de Café',
+          data: chartData,
           backgroundColor: 'rgba(75, 192, 192, 0.6)',
         }],
       });
-    } else {
-      // Resetear todos los estados si no hay aspirantes
-      setTotalCompra(0);
-      setTotalVenta(0);
-      setTotalCafe(0);
-      setNumeroCompras(0);
-      setNumeroVentas(0);
-      setChartData({ labels: [], datasets: [] });
     }
   }, [aspirantes, selectedYear, selectedMonth, selectedWeekOfMonth]);
 
-  // Generar años desde 2020 hasta el actual
+  // Años disponibles
   const years = Array.from(
     { length: new Date().getFullYear() - 2020 + 1 }, 
     (_, i) => 2020 + i
@@ -196,7 +165,7 @@ function Dashboard() {
     'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'
   ];
 
-  // Generar semanas (1-5)
+  // Semanas disponibles
   const weeks = [1, 2, 3, 4, 5];
 
   if (loading) return <div>Cargando...</div>;
@@ -209,9 +178,9 @@ function Dashboard() {
       </div>
 
       <div className="main-dashboard">
-        <h1 className="font-bold text-3xl">Almacen</h1>
+        <h1 className="font-bold text-3xl">Almacén - Resumen Semanal</h1>
 
-        {/* Selectores para semana específica */}
+        {/* Selectores de semana */}
         <div className="week-specific-selector mb-4 flex space-x-2">
           <select 
             value={selectedYear} 
@@ -244,41 +213,25 @@ function Dashboard() {
           </select>
         </div>
 
-        {/* Mostrar rango de fechas de la semana seleccionada */}
-        <div className="week-label mb-4">
-          <p className="text-lg font-semibold">
-            {`Semana ${selectedWeekOfMonth} de ${months[selectedMonth]} ${selectedYear}`}
-          </p>
-        </div>
-
-        {/* Tarjetas de resumen */}
-        <div className="targeta">
-          <div className="card">
-            <h2 className="card-title">Total Comprado</h2>
-            <p className="card-content">{formatCurrency(totalCompra)}</p>
+        {/* Resumen semanal */}
+        <div className="targeta grid grid-cols-2 gap-4 mb-6">
+          <div className="card bg-blue-100 p-4 rounded">
+            <h2 className="text-lg font-semibold">Total Comprado</h2>
+            <p className="text-2xl">{formatCurrency(weeklySummary.totalCompra)}</p>
           </div>
-
-          <div className="card">
-            <h2 className="card-title">Total Vendido</h2>
-            <p className="card-content">{formatCurrency(totalVenta)}</p>
+          <div className="card bg-green-100 p-4 rounded">
+            <h2 className="text-lg font-semibold">Total Vendido</h2>
+            <p className="text-2xl">{formatCurrency(weeklySummary.totalVenta)}</p>
           </div>
-
-          <div className="card">
-            <h2 className="card-title">Café Disponible</h2>
-            <p className="card-content">{totalCafe.toFixed(2)} kg</p>
-          </div>
-
-          <div className="card">
-            <h2 className="card-title">Número de Compras</h2>
-            <p className="card-content">{numeroCompras}</p>
-            <h2 className="card-title">Número de Ventas</h2>
-            <p className="card-content">{numeroVentas}</p>
+          <div className="card bg-yellow-100 p-4 rounded">
+            <h2 className="text-lg font-semibold">Gramos Totales</h2>
+            <p className="text-2xl">{weeklySummary.totalGramos.toFixed(2)} g</p>
           </div>
         </div>
 
         {/* Gráfica de barras */}
         <div className="barras">
-          <h2 className="bar-chart-title">Peso de Café por Tipo</h2>
+          <h2 className="text-xl font-bold mb-4">Distribución de Café por Tipo</h2>
           <Bar data={chartData} />
         </div>
       </div>
