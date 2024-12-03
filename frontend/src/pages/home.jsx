@@ -128,7 +128,7 @@ export default function Home() {
             <div>
               <h3 className="text-xl font-bold mb-4">Contacto</h3>
               <p>Dirección: Natagá, Huila, Colombia</p>
-              <p>Email: info@cafenataga.com</p>
+              <p>Email: hola</p>
               <p>Tel: +57 XXX XXX XXXX</p>
             </div>
             <div>
