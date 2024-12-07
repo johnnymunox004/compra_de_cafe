@@ -153,9 +153,7 @@ export default function Home() {
       </footer>
   
 
-    <div>
-      <ImageSlider />
-    </div>
+ 
     </div>
   );
 }
