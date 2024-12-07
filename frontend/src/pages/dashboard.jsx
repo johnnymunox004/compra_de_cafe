@@ -186,7 +186,7 @@ function Dashboard() {
           <h2 className="text-xl font-semibold text-gray-800 mb-4">
             Gráfica de Stock de Productos
           </h2>
-          <div className="w-full h-32">
+          <div className=" w-60 h-80">
             <Bar
               data={chartData}
               options={{ responsive: true, maintainAspectRatio: false }}
