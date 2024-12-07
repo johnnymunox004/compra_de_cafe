@@ -21,6 +21,8 @@ function Dashboard() {
   });
   const [filteredData, setFilteredData] = useState([]);
   const [filterType, setFilterType] = useState("all");
+  const [selectedWeek, setSelectedWeek] = useState("");
+  const [selectedMonth, setSelectedMonth] = useState("");
 
   useEffect(() => {
     fetchAspirantes(); // Carga inicial de datos
@@ -28,7 +30,7 @@ function Dashboard() {
 
   useEffect(() => {
     applyFilter();
-  }, [aspirantes, filterType]);
+  }, [aspirantes, filterType, selectedWeek, selectedMonth]);
 
   useEffect(() => {
     calculateTotals();
@@ -38,17 +40,20 @@ function Dashboard() {
     if (filterType === "all") {
       setFilteredData(aspirantes);
     } else {
-      const now = new Date();
       const filtered = aspirantes.filter((aspirante) => {
         const aspiranteDate = new Date(aspirante.date_create);
-        if (filterType === "week") {
-          const oneWeekAgo = new Date();
-          oneWeekAgo.setDate(now.getDate() - 7);
-          return aspiranteDate >= oneWeekAgo;
-        } else if (filterType === "month") {
-          return aspiranteDate.getMonth() === now.getMonth();
+        if (filterType === "week" && selectedWeek) {
+          const [weekYear, weekNumber] = selectedWeek.split("-W");
+          const aspiranteWeek = getISOWeekNumber(aspiranteDate);
+          return aspiranteWeek.year === parseInt(weekYear) && aspiranteWeek.week === parseInt(weekNumber);
+        } else if (filterType === "month" && selectedMonth) {
+          const [monthYear, monthNumber] = selectedMonth.split("-");
+          return (
+            aspiranteDate.getFullYear() === parseInt(monthYear) &&
+            aspiranteDate.getMonth() + 1 === parseInt(monthNumber)
+          );
         }
-        return true;
+        return false;
       });
       setFilteredData(filtered);
     }
@@ -71,7 +76,14 @@ function Dashboard() {
     setTotals(initialTotals);
   };
 
-  // Datos para la gráfica de stock
+  const getISOWeekNumber = (date) => {
+    const tempDate = new Date(date);
+    tempDate.setUTCDate(tempDate.getUTCDate() + 4 - (tempDate.getUTCDay() || 7));
+    const yearStart = new Date(Date.UTC(tempDate.getUTCFullYear(), 0, 1));
+    const weekNumber = Math.ceil(((tempDate - yearStart) / 86400000 + 1) / 7);
+    return { year: tempDate.getUTCFullYear(), week: weekNumber };
+  };
+
   const productTypes = [
     "Seco",
     "Caturra",
@@ -82,9 +94,9 @@ function Dashboard() {
     "Tabi",
     "Variedad Castillo",
   ];
+
   const stockData = productTypes.map((type) => {
-    return filteredData.filter((aspirante) => aspirante.tipo_cafe === type)
-      .length;
+    return filteredData.filter((aspirante) => aspirante.tipo_cafe === type).length;
   });
 
   const chartData = {
@@ -115,7 +127,7 @@ function Dashboard() {
         <NavLinks className="flex" />
       </div>
 
-      <div className=" main-dashboard">
+      <div className="main-dashboard">
         <label className="block text-sm font-medium text-gray-700 mb-2">
           Filtrar por:
         </label>
@@ -124,52 +136,65 @@ function Dashboard() {
           onChange={(e) => setFilterType(e.target.value)}
         >
           <option value="all">Mostrar Todo</option>
-          <option value="week">Última Semana</option>
-          <option value="month">Último Mes</option>
+          <option value="week">Por Semana</option>
+          <option value="month">Por Mes</option>
         </select>
-      
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 gap-6 mt-5">
-        {/* Card para Ventas */}
-        <div className="bg-white shadow-md rounded-lg p-6 border border-gray-200">
-          <h2 className="text-xl font-semibold text-gray-800 mb-2">
-            Totales de Ventas
-          </h2>
-          <p className="text-sm text-gray-600">
-            <strong>Precio Total:</strong> ${totals.venta.precio}
-          </p>
-          <p className="text-sm text-gray-600">
-            <strong>Peso Total:</strong> {totals.venta.peso} g
-          </p>
-        </div>
-
-        {/* Card para Compras */}
-        <div className="bg-white shadow-md rounded-lg p-6 border border-gray-200">
-          <h2 className="text-xl font-semibold text-gray-800 mb-2">
-            Totales de Compras
-          </h2>
-          <p className="text-sm text-gray-600">
-            <strong>Precio Total:</strong> ${totals.compra.precio}
-          </p>
-          <p className="text-sm text-gray-600">
-            <strong>Peso Total:</strong> {totals.compra.peso} g
-          </p>
-        </div>
-      </div>
-
-      <div className="mt-10 bg-white shadow-md rounded-lg p-6 border border-gray-200">
-        <h2 className="text-xl font-semibold text-gray-800 mb-4">
-          Gráfica de Stock de Productos
-        </h2>
-        <div className="w-full max-w-sm">
-          <Bar
-            data={chartData}
-            options={{ responsive: true, maintainAspectRatio: false }}
+        {filterType === "week" && (
+          <input
+            type="week"
+            className="border border-gray-300 rounded-lg p-2 mt-2"
+            onChange={(e) => setSelectedWeek(e.target.value)}
           />
+        )}
+
+        {filterType === "month" && (
+          <input
+            type="month"
+            className="border border-gray-300 rounded-lg p-2 mt-2"
+            onChange={(e) => setSelectedMonth(e.target.value)}
+          />
+        )}
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 gap-6 mt-5">
+          <div className="bg-white shadow-md rounded-lg p-6 border border-gray-200">
+            <h2 className="text-xl font-semibold text-gray-800 mb-2">
+              Totales de Ventas
+            </h2>
+            <p className="text-sm text-gray-600">
+              <strong>Precio Total:</strong> ${totals.venta.precio}
+            </p>
+            <p className="text-sm text-gray-600">
+              <strong>Peso Total:</strong> {totals.venta.peso} g
+            </p>
+          </div>
+
+          <div className="bg-white shadow-md rounded-lg p-6 border border-gray-200">
+            <h2 className="text-xl font-semibold text-gray-800 mb-2">
+              Totales de Compras
+            </h2>
+            <p className="text-sm text-gray-600">
+              <strong>Precio Total:</strong> ${totals.compra.precio}
+            </p>
+            <p className="text-sm text-gray-600">
+              <strong>Peso Total:</strong> {totals.compra.peso} g
+            </p>
+          </div>
+        </div>
+
+        <div className="mt-10 bg-white shadow-md rounded-lg p-6 border border-gray-200">
+          <h2 className="text-xl font-semibold text-gray-800 mb-4">
+            Gráfica de Stock de Productos
+          </h2>
+          <div className="w-full h-32">
+            <Bar
+              data={chartData}
+              options={{ responsive: true, maintainAspectRatio: false }}
+            />
+          </div>
         </div>
       </div>
     </div>
-    </div>   
   );
 }
 
