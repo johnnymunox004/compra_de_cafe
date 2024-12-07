@@ -59,9 +59,9 @@ function Dashboard() {
   if (error) return <div className="text-center text-red-500 mt-10">Error al cargar datos: {error}</div>;
 
   return (
-    <div className="aside-dashboard bg-gray-100 min-h-screen p-5 flex">
+    <div className=" bg-gray-100 min-h-screen p-5 flex">
       <div>
-        <NavLinks />
+        <NavLinks className="flex" />
       </div>
 
       <div className="my-4 flex flex-col sm:flex-row items-center justify-between gap-4">
