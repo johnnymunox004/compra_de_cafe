@@ -1,5 +1,5 @@
-import { create } from 'zustand';
-import axios from 'axios';
+import { create } from "zustand";
+import axios from "axios";
 
 const useAspirantesStore = create((set) => ({
   aspirantes: [],
@@ -9,14 +9,17 @@ const useAspirantesStore = create((set) => ({
   fetchAspirantes: async () => {
     set({ loading: true });
     try {
-      const token = localStorage.getItem('token');
-      
-      const response = await axios.get("https://compra-de-cafe-backend.onrender.com/api/aspirantes", {
-        headers: {
-          "Content-Type": "application/json",
-          "Authorization": `Bearer ${token}`,
-        },
-      });
+      const token = localStorage.getItem("token");
+
+      const response = await axios.get(
+        "https://compra-de-cafe-backend.onrender.com/api/aspirantes",
+        {
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
       set({ aspirantes: response.data, loading: false });
     } catch (error) {
       set({ error: error.message, loading: false });
@@ -26,14 +29,21 @@ const useAspirantesStore = create((set) => ({
   createAspirante: async (newAspirante) => {
     set({ loading: true });
     try {
-      const token = localStorage.getItem('token');
-      await axios.post("https://compra-de-cafe-backend.onrender.com/api/aspirantes", newAspirante, {
-        headers: {
-          "Content-Type": "application/json",
-          "Authorization": `Bearer ${token}`,
-        },
-      });
-      set((state) => ({ aspirantes: [...state.aspirantes, newAspirante], loading: false }));
+      const token = localStorage.getItem("token");
+      await axios.post(
+        "https://compra-de-cafe-backend.onrender.com/api/aspirantes",
+        newAspirante,
+        {
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+      set((state) => ({
+        aspirantes: [...state.aspirantes, newAspirante],
+        loading: false,
+      }));
     } catch (error) {
       set({ error: error.message, loading: false });
     }
@@ -42,14 +52,21 @@ const useAspirantesStore = create((set) => ({
   createEmpleados: async (newAspirante) => {
     set({ loading: true });
     try {
-      const token = localStorage.getItem('token');
-      await axios.post("https://compra-de-cafe-backend.onrender.com/api/empleados", newAspirante, {
-        headers: {
-          "Content-Type": "application/json",
-          "Authorization": `Bearer ${token}`,
-        },
-      });
-      set((state) => ({ aspirantes: [...state.aspirantes, newAspirante], loading: false }));
+      const token = localStorage.getItem("token");
+      await axios.post(
+        "https://compra-de-cafe-backend.onrender.com/api/empleados",
+        newAspirante,
+        {
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+      set((state) => ({
+        aspirantes: [...state.aspirantes, newAspirante],
+        loading: false,
+      }));
     } catch (error) {
       set({ error: error.message, loading: false });
     }
@@ -58,13 +75,17 @@ const useAspirantesStore = create((set) => ({
   updateAspirante: async (id, updatedAspirante) => {
     set({ loading: true });
     try {
-      const token = localStorage.getItem('token');
-      await axios.put(`https://compra-de-cafe-backend.onrender.com/api/aspirantes/${id}`, updatedAspirante, {
-        headers: {
-          "Content-Type": "application/json",
-          "Authorization": `Bearer ${token}`,
-        },
-      });
+      const token = localStorage.getItem("token");
+      await axios.put(
+        `https://compra-de-cafe-backend.onrender.com/api/aspirantes/${id}`,
+        updatedAspirante,
+        {
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
       set((state) => ({
         aspirantes: state.aspirantes.map((aspirante) =>
           aspirante._id === id ? updatedAspirante : aspirante
@@ -79,15 +100,20 @@ const useAspirantesStore = create((set) => ({
   deleteAspirante: async (id) => {
     set({ loading: true });
     try {
-      const token = localStorage.getItem('token');
-      await axios.delete(`https://compra-de-cafe-backend.onrender.com/api/aspirantes/${id}`, {
-        headers: {
-          "Content-Type": "application/json",
-          "Authorization": `Bearer ${token}`,
-        },
-      });
+      const token = localStorage.getItem("token");
+      await axios.delete(
+        `https://compra-de-cafe-backend.onrender.com/api/aspirantes/${id}`,
+        {
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
       set((state) => ({
-        aspirantes: state.aspirantes.filter((aspirante) => aspirante._id !== id),
+        aspirantes: state.aspirantes.filter(
+          (aspirante) => aspirante._id !== id
+        ),
         loading: false,
       }));
     } catch (error) {
