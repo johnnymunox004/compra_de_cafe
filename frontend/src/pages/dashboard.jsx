@@ -18,6 +18,7 @@ function Dashboard() {
   const [totals, setTotals] = useState({
     venta: { precio: 0, peso: 0 },
     compra: { precio: 0, peso: 0 },
+    pendientes: 0,
   });
   const [filteredData, setFilteredData] = useState([]);
   const [filterType, setFilterType] = useState("all");
@@ -45,7 +46,10 @@ function Dashboard() {
         if (filterType === "week" && selectedWeek) {
           const [weekYear, weekNumber] = selectedWeek.split("-W");
           const aspiranteWeek = getISOWeekNumber(aspiranteDate);
-          return aspiranteWeek.year === parseInt(weekYear) && aspiranteWeek.week === parseInt(weekNumber);
+          return (
+            aspiranteWeek.year === parseInt(weekYear) &&
+            aspiranteWeek.week === parseInt(weekNumber)
+          );
         } else if (filterType === "month" && selectedMonth) {
           const [monthYear, monthNumber] = selectedMonth.split("-");
           return (
@@ -63,13 +67,17 @@ function Dashboard() {
     const initialTotals = {
       venta: { precio: 0, peso: 0 },
       compra: { precio: 0, peso: 0 },
+      pendientes: 0,
     };
 
     filteredData.forEach((aspirante) => {
-      const { estado, precio, peso } = aspirante;
+      const { estado, precio, peso, estado_monetario } = aspirante;
       if (estado === "venta" || estado === "compra") {
         initialTotals[estado].precio += precio;
         initialTotals[estado].peso += peso;
+      }
+      if (estado_monetario === "pendiente") {
+        initialTotals.pendientes += 1;
       }
     });
 
@@ -96,17 +104,21 @@ function Dashboard() {
   ];
 
   const stockData = productTypes.map((type) => {
-    return filteredData.filter((aspirante) => aspirante.tipo_cafe === type).length;
+    return (
+      filteredData
+        .filter((aspirante) => aspirante.tipo_cafe === type)
+        .reduce((sum, aspirante) => sum + aspirante.peso, 0) / 1000 // Convertir a kg
+    );
   });
 
   const chartData = {
     labels: productTypes,
     datasets: [
       {
-        label: "Cantidad de Productos",
+        label: "Peso en Kilogramos",
         data: stockData,
-        backgroundColor: "rgba(54, 162, 235, 0.6)",
-        borderColor: "rgba(54, 162, 235, 1)",
+        backgroundColor: "rgba(75, 192, 192, 0.6)",
+        borderColor: "rgba(75, 192, 192, 1)",
         borderWidth: 1,
       },
     ],
@@ -156,7 +168,7 @@ function Dashboard() {
           />
         )}
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 gap-6 mt-5">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mt-5">
           <div className="bg-white shadow-md rounded-lg p-6 border border-gray-200">
             <h2 className="text-xl font-semibold text-gray-800 mb-2">
               Totales de Ventas
@@ -180,13 +192,22 @@ function Dashboard() {
               <strong>Peso Total:</strong> {totals.compra.peso} g
             </p>
           </div>
+
+          <div className="bg-white shadow-md rounded-lg p-6 border border-gray-200">
+            <h2 className="text-xl font-semibold text-gray-800 mb-2">
+              Estado Monetario: Pendientes
+            </h2>
+            <p className="text-sm text-gray-600">
+              <strong>Total Pendientes:</strong> {totals.pendientes}
+            </p>
+          </div>
         </div>
 
         <div className="mt-10 bg-white shadow-md rounded-lg p-6 border border-gray-200">
           <h2 className="text-xl font-semibold text-gray-800 mb-4">
-            Gráfica de Stock de Productos
+            Gráfica de Stock de Productos (Peso en Kg)
           </h2>
-          <div className=" w-60 h-80">
+          <div className="w-1/2 h-1/3">
             <Bar
               data={chartData}
               options={{ responsive: true, maintainAspectRatio: false }}
