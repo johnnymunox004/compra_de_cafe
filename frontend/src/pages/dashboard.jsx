@@ -63,6 +63,7 @@ function Dashboard() {
       <div>
         <NavLinks className="flex" />
       </div>
+      <div className=" main-dashboard">  
 
       <div className="my-4 flex flex-col sm:flex-row items-center justify-between gap-4">
         <select
@@ -91,7 +92,7 @@ function Dashboard() {
         )}
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mt-5">
+      <div className="main-dashboard">
         {filteredAspirantes.map((aspirante) => (
           <div
             key={aspirante.id}
@@ -126,6 +127,7 @@ function Dashboard() {
             </p>
           </div>
         ))}
+      </div>
       </div>
     </div>
   );
