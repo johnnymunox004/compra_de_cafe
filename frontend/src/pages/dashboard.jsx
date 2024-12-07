@@ -2,7 +2,14 @@ import React, { useEffect, useState } from "react";
 import NavLinks from "../components/navLinks";
 import useAspirantesStore from "../store/useAspirantesStore";
 import { Bar } from "react-chartjs-2";
-import { Chart as ChartJS, BarElement, CategoryScale, LinearScale, Tooltip, Legend } from "chart.js";
+import {
+  Chart as ChartJS,
+  BarElement,
+  CategoryScale,
+  LinearScale,
+  Tooltip,
+  Legend,
+} from "chart.js";
 
 ChartJS.register(BarElement, CategoryScale, LinearScale, Tooltip, Legend);
 
@@ -65,9 +72,19 @@ function Dashboard() {
   };
 
   // Datos para la gráfica de stock
-  const productTypes = ["Seco", "Caturra", "Variedad Colombia", "F6", "Borboun Rosado", "Geishar", "Tabi", "Variedad Castillo"];
+  const productTypes = [
+    "Seco",
+    "Caturra",
+    "Variedad Colombia",
+    "F6",
+    "Borboun Rosado",
+    "Geishar",
+    "Tabi",
+    "Variedad Castillo",
+  ];
   const stockData = productTypes.map((type) => {
-    return filteredData.filter((aspirante) => aspirante.tipo_cafe === type).length;
+    return filteredData.filter((aspirante) => aspirante.tipo_cafe === type)
+      .length;
   });
 
   const chartData = {
@@ -83,19 +100,25 @@ function Dashboard() {
     ],
   };
 
-  if (loading) return <div className="text-center text-lg mt-10">Cargando datos...</div>;
-  if (error) return <div className="text-center text-red-500 mt-10">Error al cargar datos: {error}</div>;
+  if (loading)
+    return <div className="text-center text-lg mt-10">Cargando datos...</div>;
+  if (error)
+    return (
+      <div className="text-center text-red-500 mt-10">
+        Error al cargar datos: {error}
+      </div>
+    );
 
   return (
     <div className="aside-dashboard flex">
       <div>
         <NavLinks className="flex" />
       </div>
-      
-      <div className=" main-dashboard">  
 
-      
-      <label className="block text-sm font-medium text-gray-700 mb-2">Filtrar por:</label>
+      <div className=" main-dashboard">
+        <label className="block text-sm font-medium text-gray-700 mb-2">
+          Filtrar por:
+        </label>
         <select
           className="border border-gray-300 rounded-lg p-2"
           onChange={(e) => setFilterType(e.target.value)}
@@ -104,12 +127,14 @@ function Dashboard() {
           <option value="week">Última Semana</option>
           <option value="month">Último Mes</option>
         </select>
-      </div>
+      
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 gap-6 mt-5">
         {/* Card para Ventas */}
         <div className="bg-white shadow-md rounded-lg p-6 border border-gray-200">
-          <h2 className="text-xl font-semibold text-gray-800 mb-2">Totales de Ventas</h2>
+          <h2 className="text-xl font-semibold text-gray-800 mb-2">
+            Totales de Ventas
+          </h2>
           <p className="text-sm text-gray-600">
             <strong>Precio Total:</strong> ${totals.venta.precio}
           </p>
@@ -120,7 +145,9 @@ function Dashboard() {
 
         {/* Card para Compras */}
         <div className="bg-white shadow-md rounded-lg p-6 border border-gray-200">
-          <h2 className="text-xl font-semibold text-gray-800 mb-2">Totales de Compras</h2>
+          <h2 className="text-xl font-semibold text-gray-800 mb-2">
+            Totales de Compras
+          </h2>
           <p className="text-sm text-gray-600">
             <strong>Precio Total:</strong> ${totals.compra.precio}
           </p>
@@ -131,13 +158,18 @@ function Dashboard() {
       </div>
 
       <div className="mt-10 bg-white shadow-md rounded-lg p-6 border border-gray-200">
-  <h2 className="text-xl font-semibold text-gray-800 mb-4">Gráfica de Stock de Productos</h2>
-  <div className="w-full max-w-sm">
-    <Bar data={chartData} options={{ responsive: true, maintainAspectRatio: false }} />
-  </div>
-</div>
-      
+        <h2 className="text-xl font-semibold text-gray-800 mb-4">
+          Gráfica de Stock de Productos
+        </h2>
+        <div className="w-full max-w-sm">
+          <Bar
+            data={chartData}
+            options={{ responsive: true, maintainAspectRatio: false }}
+          />
+        </div>
+      </div>
     </div>
+    </div>   
   );
 }
 
