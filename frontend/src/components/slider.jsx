@@ -1,5 +1,4 @@
 import React, { useState } from 'react';
-import './Slider.css';
 
 const ImageSlider = () => {
   const [activeIndex, setActiveIndex] = useState(0);
@@ -48,75 +47,77 @@ const ImageSlider = () => {
   };
 
   return (
-    <div className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-4/5 h-[60vh] bg-gray-100 shadow-lg overflow-hidden">
-      <div className="relative w-full h-full">
-        {slides.map((slide, index) => {
-          const position = (index - activeIndex + slides.length) % slides.length;
-          
-          return (
-            <div 
-              key={index} 
-              className={`absolute top-1/2 -translate-y-1/2 w-[200px] h-[300px] rounded-xl shadow-2xl bg-cover bg-center transition-all duration-500 ${
-                position === 0 || position === 1 
-                  ? 'top-0 left-0 translate-y-0 w-full h-full rounded-none' 
-                  : ''
-              }`}
-              style={{ 
-                backgroundImage: `url(${slide.backgroundImage})`,
-                left: getItemPosition(position),
-                opacity: position === 5 ? 0 : 1
-              }}
-            >
+    <div className="bg-[#ccc6c6] overflow-hidden">
+      <div className="container">
+        <div className="slide relative w-full h-full">
+          {slides.map((slide, index) => {
+            const position = (index - activeIndex + slides.length) % slides.length;
+            
+            return (
               <div 
-                className={`absolute top-1/2 left-[100px] -translate-y-1/2 w-[300px] text-left text-gray-100 font-system ${
-                  position === 1 ? 'block' : 'hidden'
+                key={index} 
+                className={`item absolute top-1/2 -translate-y-1/2 w-[200px] h-[300px] rounded-xl shadow-2xl bg-cover bg-center transition-all duration-500 ${
+                  position === 0 || position === 1 
+                    ? 'top-0 left-0 translate-y-0 w-full h-full rounded-none' 
+                    : ''
                 }`}
+                style={{ 
+                  backgroundImage: `url(${slide.backgroundImage})`,
+                  left: getItemPosition(position),
+                  opacity: position === 5 ? 0 : 1
+                }}
               >
                 <div 
-                  className="text-4xl uppercase font-bold animate-slide-in"
-                  style={{ 
-                    animationDelay: '0s',
-                    animationFillMode: 'forwards'
-                  }}
+                  className={`content absolute top-1/2 left-[100px] -translate-y-1/2 w-[300px] text-left text-[#eee] font-system ${
+                    position === 1 ? 'block' : 'hidden'
+                  }`}
                 >
-                  {slide.name}
+                  <div 
+                    className="name text-4xl uppercase font-bold opacity-0 animate-slide-in"
+                    style={{ 
+                      animationDelay: '0s',
+                      animationFillMode: 'forwards'
+                    }}
+                  >
+                    {slide.name}
+                  </div>
+                  <div 
+                    className="des mt-2.5 mb-5 opacity-0 animate-slide-in"
+                    style={{ 
+                      animationDelay: '0.3s',
+                      animationFillMode: 'forwards'
+                    }}
+                  >
+                    {slide.description}
+                  </div>
+                  <button 
+                    className="content-button px-5 py-2.5 border-none cursor-pointer opacity-0 animate-slide-in"
+                    style={{ 
+                      animationDelay: '0.6s',
+                      animationFillMode: 'forwards'
+                    }}
+                  >
+                    See More
+                  </button>
                 </div>
-                <div 
-                  className="mt-2.5 mb-5 animate-slide-in"
-                  style={{ 
-                    animationDelay: '0.3s',
-                    animationFillMode: 'forwards'
-                  }}
-                >
-                  {slide.description}
-                </div>
-                <button 
-                  className="px-5 py-2.5 border-none cursor-pointer animate-slide-in"
-                  style={{ 
-                    animationDelay: '0.6s',
-                    animationFillMode: 'forwards'
-                  }}
-                >
-                  See More
-                </button>
               </div>
-            </div>
-          );
-        })}
-      </div>
-      <div className="absolute bottom-5 w-full text-center">
-        <button 
-          className="w-10 h-9 rounded-lg border border-black mx-1.5 hover:bg-gray-400 hover:text-white transition-colors"
-          onClick={handlePrev}
-        >
-          <i className="fa-solid fa-arrow-left"></i>
-        </button>
-        <button 
-          className="w-10 h-9 rounded-lg border border-black mx-1.5 hover:bg-gray-400 hover:text-white transition-colors"
-          onClick={handleNext}
-        >
-          <i className="fa-solid fa-arrow-right"></i>
-        </button>
+            );
+          })}
+        </div>
+        <div className="button absolute bottom-5 w-full text-center">
+          <button 
+            className="prev w-10 h-9 rounded-lg border border-black mx-1.5 hover:bg-[#ababab] hover:text-white transition-colors"
+            onClick={handlePrev}
+          >
+            <i className="fa-solid fa-arrow-left"></i>
+          </button>
+          <button 
+            className="next w-10 h-9 rounded-lg border border-black mx-1.5 hover:bg-[#ababab] hover:text-white transition-colors"
+            onClick={handleNext}
+          >
+            <i className="fa-solid fa-arrow-right"></i>
+          </button>
+        </div>
       </div>
     </div>
   );
