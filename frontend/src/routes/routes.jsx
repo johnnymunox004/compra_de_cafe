@@ -11,7 +11,6 @@ import NotificationsPage from "../pages/notificaciones";
 import CreateNotificationPage from '../pages/crearnotifi';
 import Dashboard from '../pages/dashboard';
 import DashboardUsuarios from '../pages/dashboardUsers';
-import ImageSlider from '../components/slider.jsx';
 import Profile from '../pages/profile';
 
 const AppRoutes = () => {
@@ -20,7 +19,6 @@ const AppRoutes = () => {
       <Route path="/login" element={<LoginPage />} />
       <Route path="*" element={<Page404 />} />
       <Route path="/" element={<Home />} />
-      <Route path="/hola" element={<ImageSlider />} />
 
       <Route path='/dashboard' element={<Dashboard/>}/>
 
