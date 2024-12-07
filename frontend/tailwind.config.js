@@ -14,7 +14,24 @@ module.exports = {
           900: '#78350F',
         },
       },
-    },
+      keyframes: {
+        slideIn: {
+          '0%': { 
+            opacity: '0',
+            transform: 'translate(0, 100px)',
+            filter: 'blur(33px)'
+          },
+          '100%': { 
+            opacity: '1',
+            transform: 'translate(0)',
+            filter: 'blur(0)'
+          }
+        }
+      },
+      animation: {
+        'slide-in': 'slideIn 1s ease-in-out forwards'
+      }
+    }
   },
   plugins: [
     require('flowbite/plugin'),
