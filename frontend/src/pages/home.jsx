@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import ImageSlider from '../components/slider.jsx'
 
 export default function Home() {
   const [isDialogOpen, setDialogOpen] = useState(false);
@@ -150,6 +151,7 @@ export default function Home() {
           </div>
         </div>
       </footer>
+      <ImageSlider />
     </div>
   );
 }

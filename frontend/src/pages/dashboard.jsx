@@ -86,7 +86,9 @@ function Dashboard() {
 
   const getISOWeekNumber = (date) => {
     const tempDate = new Date(date);
-    tempDate.setUTCDate(tempDate.getUTCDate() + 4 - (tempDate.getUTCDay() || 7));
+    tempDate.setUTCDate(
+      tempDate.getUTCDate() + 4 - (tempDate.getUTCDay() || 7)
+    );
     const yearStart = new Date(Date.UTC(tempDate.getUTCFullYear(), 0, 1));
     const weekNumber = Math.ceil(((tempDate - yearStart) / 86400000 + 1) / 7);
     return { year: tempDate.getUTCFullYear(), week: weekNumber };
@@ -107,7 +109,7 @@ function Dashboard() {
     return (
       filteredData
         .filter((aspirante) => aspirante.tipo_cafe === type)
-        .reduce((sum, aspirante) => sum + aspirante.peso, 0) / 1000 // Convertir a kg
+        .reduce((sum, aspirante) => sum + aspirante.peso, 0) 
     );
   });
 
@@ -191,6 +193,7 @@ function Dashboard() {
             <p className="text-sm text-gray-600">
               <strong>Peso Total:</strong> {totals.compra.peso} g
             </p>
+            <button></button>
           </div>
 
           <div className="bg-white shadow-md rounded-lg p-6 border border-gray-200">
@@ -203,14 +206,14 @@ function Dashboard() {
           </div>
         </div>
 
-          <h2 className="text-xl font-semibold text-gray-800 mb-4 p-4">
-            Gráfica de Stock de Productos (Peso en Kg)
-          </h2>
-          <div className="w-1/2 h-96">
-            <Bar
-              data={chartData}
-              options={{ responsive: true, maintainAspectRatio: false }}
-            />
+        <h2 className="text-xl font-semibold text-gray-800 mb-4 p-4">
+          Gráfica de Stock de Productos (Peso en g)
+        </h2>
+        <div className="w-1/2 h-96">
+          <Bar
+            data={chartData}
+            options={{ responsive: true, maintainAspectRatio: false }}
+          />
         </div>
       </div>
     </div>
