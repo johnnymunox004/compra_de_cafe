@@ -1,16 +1,17 @@
 import React, { useEffect, useState } from "react";
-
+import NavLinks from '../components/navLinks';
 
 
 function Dashboard() {
 
-
-
   return (
-    <div>
-      Lorem ipsum dolor sit amet consectetur adipisicing elit. Totam ex labore asperiores fuga modi sequi dicta quo reiciendis deserunt dolorum nisi velit odit tempora, ab optio debitis dignissimos quis ad!
-    </div>
+    <div className="aside-dashboard">
+      <div>
+        <NavLinks />
+      </div>
 
+    
+    </div>
   );
 }
 
