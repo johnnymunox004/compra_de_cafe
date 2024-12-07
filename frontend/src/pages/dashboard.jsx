@@ -203,7 +203,6 @@ function Dashboard() {
           </div>
         </div>
 
-        <div className="mt-10 bg-white shadow-md rounded-lg p-6 border border-gray-200">
           <h2 className="text-xl font-semibold text-gray-800 mb-4">
             Gráfica de Stock de Productos (Peso en Kg)
           </h2>
@@ -212,7 +211,6 @@ function Dashboard() {
               data={chartData}
               options={{ responsive: true, maintainAspectRatio: false }}
             />
-          </div>
         </div>
       </div>
     </div>
