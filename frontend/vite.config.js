@@ -19,4 +19,11 @@ export default defineConfig({
     react(),
     nodePolyfills(),
   ],
+  build: {
+    rollupOptions: {
+      external: [
+        '@fortawesome/fontawesome-free', // Excluye Font Awesome del bundle
+      ],
+    },
+  },
 });
