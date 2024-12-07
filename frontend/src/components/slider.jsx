@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 
-const ImageSlider = () => {
+const ImageSliderhola = () => {
   const [activeIndex, setActiveIndex] = useState(0);
 
   const slides = [
@@ -141,4 +141,4 @@ const getItemPosition = (position) => {
   }
 };
 
-export default ImageSlider;
+export default ImageSliderhola;
