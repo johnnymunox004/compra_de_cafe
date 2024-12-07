@@ -6,7 +6,8 @@ function Dashboard() {
   const { aspirantes, loading, error, fetchAspirantes } = useAspirantesStore();
   const [filteredAspirantes, setFilteredAspirantes] = useState([]);
   const [filterType, setFilterType] = useState("all");
-  const [filterValue, setFilterValue] = useState("");
+  const [selectedMonth, setSelectedMonth] = useState("");
+  const [selectedWeek, setSelectedWeek] = useState("");
 
   useEffect(() => {
     fetchAspirantes(); // Carga inicial de datos
@@ -14,7 +15,7 @@ function Dashboard() {
 
   useEffect(() => {
     filterAspirantes(); // Filtra aspirantes cada vez que cambia el filtro
-  }, [filterType, filterValue, aspirantes]);
+  }, [filterType, selectedMonth, selectedWeek, aspirantes]);
 
   const filterAspirantes = () => {
     if (filterType === "all") {
@@ -22,24 +23,36 @@ function Dashboard() {
       return;
     }
 
-    const now = new Date();
     let filtered = aspirantes;
 
-    if (filterType === "week") {
-      const weekAgo = new Date(now.setDate(now.getDate() - 7));
+    if (filterType === "week" && selectedWeek) {
+      const [start, end] = getWeekRange(selectedWeek);
       filtered = aspirantes.filter(
-        (aspirante) => new Date(aspirante.date_create) >= weekAgo
+        (aspirante) =>
+          new Date(aspirante.date_create) >= start &&
+          new Date(aspirante.date_create) <= end
       );
     }
 
-    if (filterType === "month") {
-      const monthAgo = new Date(now.setMonth(now.getMonth() - 1));
-      filtered = aspirantes.filter(
-        (aspirante) => new Date(aspirante.date_create) >= monthAgo
-      );
+    if (filterType === "month" && selectedMonth) {
+      const [year, month] = selectedMonth.split("-");
+      filtered = aspirantes.filter((aspirante) => {
+        const date = new Date(aspirante.date_create);
+        return date.getFullYear() === parseInt(year) && date.getMonth() === parseInt(month) - 1;
+      });
     }
 
     setFilteredAspirantes(filtered);
+  };
+
+  const getWeekRange = (weekString) => {
+    const [year, week] = weekString.split("-W");
+    const firstDayOfYear = new Date(year, 0, 1);
+    const daysOffset = (parseInt(week) - 1) * 7;
+    const startOfWeek = new Date(firstDayOfYear.setDate(firstDayOfYear.getDate() + daysOffset));
+    const endOfWeek = new Date(startOfWeek);
+    endOfWeek.setDate(startOfWeek.getDate() + 6);
+    return [startOfWeek, endOfWeek];
   };
 
   if (loading) return <div className="text-center text-lg mt-10">Cargando datos...</div>;
@@ -57,9 +70,25 @@ function Dashboard() {
           onChange={(e) => setFilterType(e.target.value)}
         >
           <option value="all">Mostrar Todo</option>
-          <option value="week">Última Semana</option>
-          <option value="month">Último Mes</option>
+          <option value="week">Seleccionar Semana</option>
+          <option value="month">Seleccionar Mes</option>
         </select>
+
+        {filterType === "week" && (
+          <input
+            type="week"
+            className="border border-gray-300 rounded-lg p-2"
+            onChange={(e) => setSelectedWeek(e.target.value)}
+          />
+        )}
+
+        {filterType === "month" && (
+          <input
+            type="month"
+            className="border border-gray-300 rounded-lg p-2"
+            onChange={(e) => setSelectedMonth(e.target.value)}
+          />
+        )}
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mt-5">
