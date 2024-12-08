@@ -381,7 +381,7 @@ function DashboardListAspirant() {
                 />
               </div>
               <div className="mb-4">
-                <Label htmlFor="estado" value="Estado" />
+                <Label htmlFor="estado"  />
                 <select
                   id="estado"
                   name="estado"
