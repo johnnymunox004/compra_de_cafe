@@ -199,7 +199,7 @@ function DashboardListAspirant() {
       </div>
       <div className="main-dashboard">
         <div className="p-8">
-          <h1 className="text-2xl font-bold mt-6 mb-4">Aspirantes</h1>
+          <h1 className="text-2xl font-bold mt-6 mb-4">compra</h1>
 
 
 
@@ -212,14 +212,7 @@ function DashboardListAspirant() {
             Agregar Compra
           </Button>
 
-          <CSVLink
-            data={csvData}
-            filename={"aspirantes.csv"}
-            className="mb-4 bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
-            target="_blank"
-          >
-            Descargar CSV
-          </CSVLink>
+     
 
           {/* Tabla de aspirantes */}
           <div className="overflow-y-auto max-h-96 mt-4">

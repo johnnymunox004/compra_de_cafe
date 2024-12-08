@@ -199,18 +199,12 @@ function Profile() {
       </div>
       <div className="main-dashboard">
         <div className="p-8">
-          <h1 className="text-2xl font-bold mt-6 mb-4">Aspirantes</h1>
+          <h1 className="text-2xl font-bold mt-6 mb-4">base de datos</h1>
 
 
 
 
-          <Button
-            color="success"
-            className="mb-4"
-            onClick={() => setShowModal(true)}
-          >
-            Agregar Compra
-          </Button>
+      
 
           <CSVLink
             data={csvData}
