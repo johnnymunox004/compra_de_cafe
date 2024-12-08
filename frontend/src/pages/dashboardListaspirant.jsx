@@ -201,63 +201,8 @@ function DashboardListAspirant() {
         <div className="p-8">
           <h1 className="text-2xl font-bold mt-6 mb-4">Aspirantes</h1>
 
-          {/* Input de búsqueda */}
-          <div className="mb-4">
-            <input
-              type="text"
-              placeholder="Buscar aspirante..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="px-4 py-2 border rounded-lg focus:outline-none focus:border-blue-500"
-            />
-          </div>
 
-          {/* Total del Día Seleccionado */}
-          <div className="mb-6 p-4 border rounded-lg shadow-md bg-white">
-            <h2 className="text-xl font-bold mb-4">
-              Total del Día Seleccionado
-            </h2>
-            <span className="text-lg font-semibold">
-              {calcularTotalPorFecha().toLocaleString("es-CO", {
-                style: "currency",
-                currency: "COP",
-              })}
-            </span>
-          </div>
 
-          {/* Tarjeta de Ventas por Día */}
-          <div className="mb-6 p-4 border rounded-lg shadow-md bg-white">
-            <h2 className="text-xl font-bold mb-4">Ventas por Día</h2>
-            <ul>
-              {Object.entries(ventasPorDia).map(([fecha, total]) => (
-                <li key={fecha} className="flex justify-between">
-                  <span>{fecha}</span>
-                  <span>
-                    {total.toLocaleString("es-CO", {
-                      style: "currency",
-                      currency: "COP",
-                    })}
-                  </span>
-                </li>
-              ))}
-            </ul>
-          </div>
-
-          {/* Input de fecha para filtrar */}
-          <div className="mb-4 w-36">
-            <Label
-              htmlFor="date_filter"
-              value="Filtrar por fecha"
-              className="text-lg font-bold mt-6 mb-4"
-            />
-            <TextInput
-              id="date_filter"
-              type="date"
-              value={selectedDate}
-              onChange={handleDateChange}
-              className="border rounded-lg focus:outline-none focus:border-blue-500"
-            />
-          </div>
 
           <Button
             color="success"
