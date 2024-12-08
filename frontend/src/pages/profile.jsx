@@ -5,6 +5,8 @@ import NavLinks from "../components/navLinks";
 import { CSVLink } from "react-csv";
 import GeneradorPDF from "../components/GeneradorPDF";
 import LoadingSpinner from "../components/loadingSpinner";
+import "react-datepicker/dist/react-datepicker.css";
+import DatePicker from "react-datepicker";
 
 function Profile() {
   const {
@@ -18,9 +20,11 @@ function Profile() {
   } = useAspirantesStore();
 
   const [searchTerm, setSearchTerm] = useState(""); // Corregido
-  const [selectedDate, setSelectedDate] = useState(""); // Nuevo estado
+
   const [selectedWeek, setSelectedWeek] = useState(""); // Nuevo estado
-  const [selectedMonth, setSelectedMonth] = useState(""); // Nuevo estado
+  const [selectedMonth, setSelectedMonth] = useState(null); // Cambiado a objeto de fecha
+  const [selectedDate, setSelectedDate] = useState(null); // Para filtro por día
+
   const [showModal, setShowModal] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [formData, setFormData] = useState({
@@ -157,34 +161,30 @@ function Profile() {
     return { year: tempDate.getUTCFullYear(), week: weekNumber };
   };
 
-  const filteredAspirantes = aspirantes.filter((aspirante) => {
-    const lowerCaseSearchTerm = searchTerm.toLowerCase();
-    const aspiranteDate = new Date(aspirante.date_create);
+  const filterAspirantes = () => {
+    return aspirantes.filter((aspirante) => {
+      const creationDate = new Date(aspirante.date_create);
 
-    // Filtro por búsqueda
-    const matchesSearch =
-      aspirante.nombre.toLowerCase().includes(lowerCaseSearchTerm) ||
-      aspirante.identificacion.includes(searchTerm) ||
-      aspirante.telefono.includes(searchTerm);
+      // Filtrar por fecha exacta
+      if (selectedDate) {
+        return (
+          creationDate.toISOString().split("T")[0] ===
+          selectedDate.toISOString().split("T")[0]
+        );
+      }
 
-    // Filtro por fecha específica
-    const matchesDate = selectedDate
-      ? aspiranteDate.toISOString().split("T")[0] === selectedDate
-      : true;
+      // Filtrar por mes
+      if (selectedMonth) {
+        return (
+          creationDate.getFullYear() === selectedMonth.getFullYear() &&
+          creationDate.getMonth() === selectedMonth.getMonth()
+        );
+      }
 
-    // Filtro por semana ISO
-    const aspiranteWeek = getISOWeekNumber(aspiranteDate);
-    const matchesWeek = selectedWeek
-      ? parseInt(selectedWeek, 10) === aspiranteWeek.week
-      : true;
-
-    // Filtro por mes
-    const matchesMonth = selectedMonth
-      ? aspiranteDate.getMonth() + 1 === parseInt(selectedMonth, 10)
-      : true;
-
-    return matchesSearch && matchesDate && matchesWeek && matchesMonth;
-  });
+      // Si no hay filtro, mostrar todos
+      return true;
+    });
+  };
 
   // filtrossssssssssssssssssssssssssssssss
 
@@ -208,41 +208,24 @@ function Profile() {
             </div>
 
             <div>
-              <Label htmlFor="date" value="Fecha específica" />
-              <TextInput
-                id="date"
-                type="date"
-                value={selectedDate}
-                onChange={handleDateChange}
+              <Label>Filtrar por fecha:</Label>
+              <DatePicker
+                selected={selectedDate}
+                onChange={(date) => setSelectedDate(date)}
+                dateFormat="dd/MM/yyyy"
+                className="border border-gray-300 rounded-lg p-2 mt-2"
               />
             </div>
 
             <div>
-              <Label htmlFor="week" value="Semana ISO" />
-              <TextInput
-                id="week"
-                type="number"
-                placeholder="Semana (1-52)"
-                value={selectedWeek}
-                onChange={handleWeekChange}
+              <Label>Filtrar por mes:</Label>
+              <DatePicker
+                selected={selectedMonth}
+                onChange={(date) => setSelectedMonth(date)}
+                showMonthYearPicker
+                dateFormat="MM/yyyy"
+                className="border border-gray-300 rounded-lg p-2 mt-2"
               />
-            </div>
-
-            <div>
-              <Label htmlFor="month" value="Mes" />
-              <select
-                id="month"
-                value={selectedMonth}
-                onChange={handleMonthChange}
-                className="form-select"
-              >
-                <option value="">Seleccionar mes</option>
-                {Array.from({ length: 12 }, (_, i) => (
-                  <option key={i + 1} value={i + 1}>
-                    {new Date(0, i).toLocaleString("es", { month: "long" })}
-                  </option>
-                ))}
-              </select>
             </div>
           </div>
 

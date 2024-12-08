@@ -1,3 +1,4 @@
+// Import necessary React hooks and dependencies
 import React, { useEffect, useState } from "react";
 import NavLinks from "../components/navLinks";
 import useAspirantesStore from "../store/useAspirantesStore";
@@ -11,39 +12,51 @@ import {
   Legend,
 } from "chart.js";
 
+// Register Chart.js components for bar chart functionality
 ChartJS.register(BarElement, CategoryScale, LinearScale, Tooltip, Legend);
 
 function Dashboard() {
+  // Destructure state and methods from custom hook for managing aspirantes (candidates/applicants)
   const { aspirantes, loading, error, fetchAspirantes } = useAspirantesStore();
+
+  // State to track totals for sales, purchases, and pending items
   const [totals, setTotals] = useState({
     venta: { precio: 0, peso: 0 },
     compra: { precio: 0, peso: 0 },
     pendientes: 0,
   });
+
+  // State for filtering and managing data display
   const [filteredData, setFilteredData] = useState([]);
   const [filterType, setFilterType] = useState("all");
   const [selectedWeek, setSelectedWeek] = useState("");
   const [selectedMonth, setSelectedMonth] = useState("");
 
+  // Initial data fetch when component mounts
   useEffect(() => {
-    fetchAspirantes(); // Carga inicial de datos
+    fetchAspirantes(); // Load initial data
   }, [fetchAspirantes]);
 
+  // Apply filters whenever dependencies change
   useEffect(() => {
     applyFilter();
   }, [aspirantes, filterType, selectedWeek, selectedMonth]);
 
+  // Recalculate totals when filtered data changes
   useEffect(() => {
     calculateTotals();
   }, [filteredData]);
 
+  // Filter data based on selected filter type (all, week, or month)
   const applyFilter = () => {
     if (filterType === "all") {
       setFilteredData(aspirantes);
     } else {
+      // Filter aspirantes based on week or month selection
       const filtered = aspirantes.filter((aspirante) => {
         const aspiranteDate = new Date(aspirante.date_create);
         if (filterType === "week" && selectedWeek) {
+          // Week-based filtering logic
           const [weekYear, weekNumber] = selectedWeek.split("-W");
           const aspiranteWeek = getISOWeekNumber(aspiranteDate);
           return (
@@ -51,6 +64,7 @@ function Dashboard() {
             aspiranteWeek.week === parseInt(weekNumber)
           );
         } else if (filterType === "month" && selectedMonth) {
+          // Month-based filtering logic
           const [monthYear, monthNumber] = selectedMonth.split("-");
           return (
             aspiranteDate.getFullYear() === parseInt(monthYear) &&
@@ -63,6 +77,7 @@ function Dashboard() {
     }
   };
 
+  // Calculate total sales, purchases, and pending items
   const calculateTotals = () => {
     const initialTotals = {
       venta: { precio: 0, peso: 0 },
@@ -70,6 +85,7 @@ function Dashboard() {
       pendientes: 0,
     };
 
+    // Aggregate totals from filtered data
     filteredData.forEach((aspirante) => {
       const { estado, precio, peso, estado_monetario } = aspirante;
       if (estado === "venta" || estado === "compra") {
@@ -84,6 +100,7 @@ function Dashboard() {
     setTotals(initialTotals);
   };
 
+  // Helper function to calculate ISO week number
   const getISOWeekNumber = (date) => {
     const tempDate = new Date(date);
     tempDate.setUTCDate(
@@ -94,6 +111,7 @@ function Dashboard() {
     return { year: tempDate.getUTCFullYear(), week: weekNumber };
   };
 
+  // Define product types for stock chart
   const productTypes = [
     "Seco",
     "Caturra",
@@ -105,6 +123,7 @@ function Dashboard() {
     "Variedad Castillo",
   ];
 
+  // Calculate stock data for each product type
   const stockData = productTypes.map((type) => {
     return (
       filteredData
@@ -113,6 +132,7 @@ function Dashboard() {
     );
   });
 
+  // Prepare data for bar chart
   const chartData = {
     labels: productTypes,
     datasets: [
@@ -126,6 +146,7 @@ function Dashboard() {
     ],
   };
 
+  // Handle loading and error states
   if (loading)
     return <div className="text-center text-lg mt-10">Cargando datos...</div>;
   if (error)
@@ -135,13 +156,16 @@ function Dashboard() {
       </div>
     );
 
+  // Render dashboard layout
   return (
     <div className="aside-dashboard flex">
+      {/* Navigation Links */}
       <div>
         <NavLinks className="flex" />
       </div>
 
       <div className="main-dashboard">
+        {/* Filter Selection */}
         <label className="block text-sm font-medium text-gray-700 mb-2">
           Filtrar por:
         </label>
@@ -154,6 +178,7 @@ function Dashboard() {
           <option value="month">Por Mes</option>
         </select>
 
+        {/* Week Filter Input */}
         {filterType === "week" && (
           <input
             type="week"
@@ -162,6 +187,7 @@ function Dashboard() {
           />
         )}
 
+        {/* Month Filter Input */}
         {filterType === "month" && (
           <input
             type="month"
@@ -170,7 +196,9 @@ function Dashboard() {
           />
         )}
 
+        {/* Totals Summary Cards */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mt-5">
+          {/* Sales Totals Card */}
           <div className="bg-white shadow-md rounded-lg p-6 border border-gray-200">
             <h2 className="text-xl font-semibold text-gray-800 mb-2">
               Totales de Ventas
@@ -183,6 +211,7 @@ function Dashboard() {
             </p>
           </div>
 
+          {/* Purchases Totals Card */}
           <div className="bg-white shadow-md rounded-lg p-6 border border-gray-200">
             <h2 className="text-xl font-semibold text-gray-800 mb-2">
               Totales de Compras
@@ -193,9 +222,9 @@ function Dashboard() {
             <p className="text-sm text-gray-600">
               <strong>Peso Total:</strong> {totals.compra.peso} g
             </p>
-            <button></button>
           </div>
 
+          {/* Pending Items Card */}
           <div className="bg-white shadow-md rounded-lg p-6 border border-gray-200">
             <h2 className="text-xl font-semibold text-gray-800 mb-2">
               Estado Monetario: Pendientes
@@ -206,6 +235,7 @@ function Dashboard() {
           </div>
         </div>
 
+        {/* Stock Chart */}
         <h2 className="text-xl font-semibold text-gray-800 mb-4 p-4">
           Gráfica de Stock de Productos (Peso en g)
         </h2>
