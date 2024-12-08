@@ -17,6 +17,10 @@ function Profile() {
     deleteAspirante,
   } = useAspirantesStore();
 
+  const [searchTerm, setSearchTerm] = useState(""); // Corregido
+  const [selectedDate, setSelectedDate] = useState(""); // Nuevo estado
+  const [selectedWeek, setSelectedWeek] = useState(""); // Nuevo estado
+  const [selectedMonth, setSelectedMonth] = useState(""); // Nuevo estado
   const [showModal, setShowModal] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [formData, setFormData] = useState({
@@ -34,14 +38,14 @@ function Profile() {
   const [editMode, setEditMode] = useState(false);
   const [currentId, setCurrentId] = useState(null);
   const [deleteId, setDeleteId] = useState(null);
+
   const handleSearchChange = (e) => setSearchTerm(e.target.value);
 
-const handleDateChange = (e) => setSelectedDate(e.target.value);
+  const handleDateChange = (e) => setSelectedDate(e.target.value);
 
-const handleWeekChange = (e) => setSelectedWeek(e.target.value);
+  const handleWeekChange = (e) => setSelectedWeek(e.target.value);
 
-const handleMonthChange = (e) => setSelectedMonth(e.target.value);
- 
+  const handleMonthChange = (e) => setSelectedMonth(e.target.value);
 
   useEffect(() => {
     fetchAspirantes(); // Llamada para obtener los aspirantes
@@ -51,8 +55,6 @@ const handleMonthChange = (e) => setSelectedMonth(e.target.value);
     const formattedValue = name === "precio" ? String(value) : value; // Convertir a cadena si es precio
     setFormData({ ...formData, [name]: formattedValue });
   };
-
-
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -144,53 +146,47 @@ const handleMonthChange = (e) => setSelectedMonth(e.target.value);
     Fecha: aspirante.date_create,
   }));
 
-
-
   // filtrossssssssssssssssssssssssssssssss
   const getISOWeekNumber = (date) => {
     const tempDate = new Date(date);
-    tempDate.setUTCDate(tempDate.getUTCDate() + 4 - (tempDate.getUTCDay() || 7));
+    tempDate.setUTCDate(
+      tempDate.getUTCDate() + 4 - (tempDate.getUTCDay() || 7)
+    );
     const yearStart = new Date(Date.UTC(tempDate.getUTCFullYear(), 0, 1));
     const weekNumber = Math.ceil(((tempDate - yearStart) / 86400000 + 1) / 7);
     return { year: tempDate.getUTCFullYear(), week: weekNumber };
   };
-  
+
   const filteredAspirantes = aspirantes.filter((aspirante) => {
     const lowerCaseSearchTerm = searchTerm.toLowerCase();
     const aspiranteDate = new Date(aspirante.date_create);
-  
+
     // Filtro por búsqueda
     const matchesSearch =
       aspirante.nombre.toLowerCase().includes(lowerCaseSearchTerm) ||
       aspirante.identificacion.includes(searchTerm) ||
       aspirante.telefono.includes(searchTerm);
-  
+
     // Filtro por fecha específica
     const matchesDate = selectedDate
       ? aspiranteDate.toISOString().split("T")[0] === selectedDate
       : true;
-  
+
     // Filtro por semana ISO
     const aspiranteWeek = getISOWeekNumber(aspiranteDate);
     const matchesWeek = selectedWeek
       ? parseInt(selectedWeek, 10) === aspiranteWeek.week
       : true;
-  
+
     // Filtro por mes
     const matchesMonth = selectedMonth
       ? aspiranteDate.getMonth() + 1 === parseInt(selectedMonth, 10)
       : true;
-  
+
     return matchesSearch && matchesDate && matchesWeek && matchesMonth;
   });
 
   // filtrossssssssssssssssssssssssssssssss
-
-
-
-
-
-  
 
   return (
     <div className="aside-dashboard flex">
@@ -201,60 +197,54 @@ const handleMonthChange = (e) => setSelectedMonth(e.target.value);
         <div className="p-8">
           <h1 className="text-2xl font-bold mt-6 mb-4">base de datos</h1>
           <div className="flex gap-4 mb-4">
-  <div>
-    <Label htmlFor="search" value="Buscar" />
-    <TextInput
-      id="search"
-      placeholder="Buscar por nombre o identificación"
-      value={searchTerm}
-      onChange={handleSearchChange}
-    />
-  </div>
+            <div>
+              <Label htmlFor="search" value="Buscar" />
+              <TextInput
+                id="search"
+                placeholder="Buscar por nombre o identificación"
+                value={searchTerm}
+                onChange={handleSearchChange}
+              />
+            </div>
 
-  <div>
-    <Label htmlFor="date" value="Fecha específica" />
-    <TextInput
-      id="date"
-      type="date"
-      value={selectedDate}
-      onChange={handleDateChange}
-    />
-  </div>
+            <div>
+              <Label htmlFor="date" value="Fecha específica" />
+              <TextInput
+                id="date"
+                type="date"
+                value={selectedDate}
+                onChange={handleDateChange}
+              />
+            </div>
 
-  <div>
-    <Label htmlFor="week" value="Semana ISO" />
-    <TextInput
-      id="week"
-      type="number"
-      placeholder="Semana (1-52)"
-      value={selectedWeek}
-      onChange={handleWeekChange}
-    />
-  </div>
+            <div>
+              <Label htmlFor="week" value="Semana ISO" />
+              <TextInput
+                id="week"
+                type="number"
+                placeholder="Semana (1-52)"
+                value={selectedWeek}
+                onChange={handleWeekChange}
+              />
+            </div>
 
-  <div>
-    <Label htmlFor="month" value="Mes" />
-    <select
-      id="month"
-      value={selectedMonth}
-      onChange={handleMonthChange}
-      className="form-select"
-    >
-      <option value="">Seleccionar mes</option>
-      {Array.from({ length: 12 }, (_, i) => (
-        <option key={i + 1} value={i + 1}>
-          {new Date(0, i).toLocaleString("es", { month: "long" })}
-        </option>
-      ))}
-    </select>
-  </div>
-</div>
-
-
-
-
-
-      
+            <div>
+              <Label htmlFor="month" value="Mes" />
+              <select
+                id="month"
+                value={selectedMonth}
+                onChange={handleMonthChange}
+                className="form-select"
+              >
+                <option value="">Seleccionar mes</option>
+                {Array.from({ length: 12 }, (_, i) => (
+                  <option key={i + 1} value={i + 1}>
+                    {new Date(0, i).toLocaleString("es", { month: "long" })}
+                  </option>
+                ))}
+              </select>
+            </div>
+          </div>
 
           <CSVLink
             data={csvData}
@@ -447,21 +437,20 @@ const handleMonthChange = (e) => setSelectedMonth(e.target.value);
                 </select>
               </div>
               <div className="mb-4">
-   
                 <select
-          id="estado_monetario"
-          name="estado_monetario"
-          value={formData.estado_monetario}
-          onChange={handleInputChange}
-          required
-          className="form-select"
-        >
-          <option value="" disabled>
-            Selecciona una opción
-          </option>
-          <option value="pagado">Pagado</option>
-          <option value="pendiente">Pendiente</option>
-        </select>
+                  id="estado_monetario"
+                  name="estado_monetario"
+                  value={formData.estado_monetario}
+                  onChange={handleInputChange}
+                  required
+                  className="form-select"
+                >
+                  <option value="" disabled>
+                    Selecciona una opción
+                  </option>
+                  <option value="pagado">Pagado</option>
+                  <option value="pendiente">Pendiente</option>
+                </select>
               </div>
 
               <Button type="submit" className=" botones_de">
