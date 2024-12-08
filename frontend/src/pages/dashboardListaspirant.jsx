@@ -391,7 +391,7 @@ function DashboardListAspirant() {
                   className="form-select"
                 >
                   <option value="" disabled>
-                    Selecciona una opción
+                    tipo de transacción 
                   </option>
                   <option value="compra">Compra</option>
                   <option value="venta">Venta</option>
@@ -408,7 +408,7 @@ function DashboardListAspirant() {
           className="form-select"
         >
           <option value="" disabled>
-            Selecciona una opción
+            Selecciona un estado
           </option>
           <option value="pagado">Pagado</option>
           <option value="pendiente">Pendiente</option>
