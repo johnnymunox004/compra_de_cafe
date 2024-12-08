@@ -206,26 +206,7 @@ function Profile() {
               />
             </div>
 
-            <div>
-              <Label>Filtrar por fecha:</Label>
-              <DatePicker
-                selected={selectedDate}
-                onChange={(date) => setSelectedDate(date)}
-                dateFormat="dd/MM/yyyy"
-                className="border border-gray-300 rounded-lg p-2 mt-2"
-              />
-            </div>
-
-            <div>
-              <Label>Filtrar por mes:</Label>
-              <DatePicker
-                selected={selectedMonth}
-                onChange={(date) => setSelectedMonth(date)}
-                showMonthYearPicker
-                dateFormat="MM/yyyy"
-                className="border border-gray-300 rounded-lg p-2 mt-2"
-              />
-            </div>
+         
           </div>
 
           <CSVLink
