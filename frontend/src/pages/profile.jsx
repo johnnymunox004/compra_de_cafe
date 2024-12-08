@@ -34,8 +34,14 @@ function Profile() {
   const [editMode, setEditMode] = useState(false);
   const [currentId, setCurrentId] = useState(null);
   const [deleteId, setDeleteId] = useState(null);
-  const [searchTerm, setSearchTerm] = useState("");
-  const [selectedDate, setSelectedDate] = useState(""); // Estado para la fecha seleccionada
+  const handleSearchChange = (e) => setSearchTerm(e.target.value);
+
+const handleDateChange = (e) => setSelectedDate(e.target.value);
+
+const handleWeekChange = (e) => setSelectedWeek(e.target.value);
+
+const handleMonthChange = (e) => setSelectedMonth(e.target.value);
+ 
 
   useEffect(() => {
     fetchAspirantes(); // Llamada para obtener los aspirantes
@@ -46,9 +52,7 @@ function Profile() {
     setFormData({ ...formData, [name]: formattedValue });
   };
 
-  const handleDateChange = (e) => {
-    setSelectedDate(e.target.value); // Actualizar la fecha seleccionada
-  };
+
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -139,58 +143,54 @@ function Profile() {
     Estado_monetario: aspirante.estado_monetario,
     Fecha: aspirante.date_create,
   }));
-  const getVentasPorDia = () => {
-    const ventasPorDia = {};
 
-    // Filtrar las ventas
-    const ventas = aspirantes.filter(
-      (aspirante) => aspirante.estado === "venta"
-    );
 
-    // Agrupar por fecha
-    ventas.forEach((venta) => {
-      const fecha = new Date(venta.date_create).toLocaleDateString("en-CA");
-      const totalVenta = venta.precio_total; // Suponiendo que tienes este campo
 
-      if (!ventasPorDia[fecha]) {
-        ventasPorDia[fecha] = 0;
-      }
-      ventasPorDia[fecha] += totalVenta;
-    });
-
-    return ventasPorDia;
+  // filtrossssssssssssssssssssssssssssssss
+  const getISOWeekNumber = (date) => {
+    const tempDate = new Date(date);
+    tempDate.setUTCDate(tempDate.getUTCDate() + 4 - (tempDate.getUTCDay() || 7));
+    const yearStart = new Date(Date.UTC(tempDate.getUTCFullYear(), 0, 1));
+    const weekNumber = Math.ceil(((tempDate - yearStart) / 86400000 + 1) / 7);
+    return { year: tempDate.getUTCFullYear(), week: weekNumber };
   };
-
-  // Filtrar los aspirantes según la fecha seleccionada y el término de búsqueda
+  
   const filteredAspirantes = aspirantes.filter((aspirante) => {
-    const searchTermLower = searchTerm.toLowerCase();
-    const aspiranteDate = new Date(aspirante.date_create).toLocaleDateString(
-      "en-CA"
-    ); // Formatear la fecha
-    const matchesDate = selectedDate ? aspiranteDate === selectedDate : true; // Filtrar por fecha
+    const lowerCaseSearchTerm = searchTerm.toLowerCase();
+    const aspiranteDate = new Date(aspirante.date_create);
+  
+    // Filtro por búsqueda
     const matchesSearch =
-      aspirante.nombre.toLowerCase().includes(searchTermLower) ||
-      aspirante.identificacion.toLowerCase().includes(searchTermLower) ||
-      aspirante.telefono.includes(searchTermLower);
-    return matchesDate && matchesSearch;
+      aspirante.nombre.toLowerCase().includes(lowerCaseSearchTerm) ||
+      aspirante.identificacion.includes(searchTerm) ||
+      aspirante.telefono.includes(searchTerm);
+  
+    // Filtro por fecha específica
+    const matchesDate = selectedDate
+      ? aspiranteDate.toISOString().split("T")[0] === selectedDate
+      : true;
+  
+    // Filtro por semana ISO
+    const aspiranteWeek = getISOWeekNumber(aspiranteDate);
+    const matchesWeek = selectedWeek
+      ? parseInt(selectedWeek, 10) === aspiranteWeek.week
+      : true;
+  
+    // Filtro por mes
+    const matchesMonth = selectedMonth
+      ? aspiranteDate.getMonth() + 1 === parseInt(selectedMonth, 10)
+      : true;
+  
+    return matchesSearch && matchesDate && matchesWeek && matchesMonth;
   });
 
-  const calcularTotalPorFecha = () => {
-    if (!selectedDate) return 0; // Si no hay fecha seleccionada, retornamos 0
+  // filtrossssssssssssssssssssssssssssssss
 
-    const total = filteredAspirantes.reduce((acc, aspirante) => {
-      const aspiranteDate = new Date(aspirante.date_create).toLocaleDateString(
-        "en-CA"
-      );
-      return aspiranteDate === selectedDate
-        ? acc + (aspirante.precio_total || 0)
-        : acc; // Asegurarse de que precio_total esté definido
-    }, 0);
 
-    return total;
-  };
 
-  const ventasPorDia = getVentasPorDia();
+
+
+  
 
   return (
     <div className="aside-dashboard flex">
@@ -200,6 +200,56 @@ function Profile() {
       <div className="main-dashboard">
         <div className="p-8">
           <h1 className="text-2xl font-bold mt-6 mb-4">base de datos</h1>
+          <div className="flex gap-4 mb-4">
+  <div>
+    <Label htmlFor="search" value="Buscar" />
+    <TextInput
+      id="search"
+      placeholder="Buscar por nombre o identificación"
+      value={searchTerm}
+      onChange={handleSearchChange}
+    />
+  </div>
+
+  <div>
+    <Label htmlFor="date" value="Fecha específica" />
+    <TextInput
+      id="date"
+      type="date"
+      value={selectedDate}
+      onChange={handleDateChange}
+    />
+  </div>
+
+  <div>
+    <Label htmlFor="week" value="Semana ISO" />
+    <TextInput
+      id="week"
+      type="number"
+      placeholder="Semana (1-52)"
+      value={selectedWeek}
+      onChange={handleWeekChange}
+    />
+  </div>
+
+  <div>
+    <Label htmlFor="month" value="Mes" />
+    <select
+      id="month"
+      value={selectedMonth}
+      onChange={handleMonthChange}
+      className="form-select"
+    >
+      <option value="">Seleccionar mes</option>
+      {Array.from({ length: 12 }, (_, i) => (
+        <option key={i + 1} value={i + 1}>
+          {new Date(0, i).toLocaleString("es", { month: "long" })}
+        </option>
+      ))}
+    </select>
+  </div>
+</div>
+
 
 
 
