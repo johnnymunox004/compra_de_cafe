@@ -280,6 +280,8 @@ function DashboardListAspirant() {
                         estado_monetario={aspirante.estado_monetario}
                         date_create={aspirante.date_create}
                       />
+
+                      {/* boton de eliminar
                       <Button
                         onClick={() => {
                           setDeleteId(aspirante._id);
@@ -288,7 +290,7 @@ function DashboardListAspirant() {
                         color="failure"
                       >
                         Eliminar
-                      </Button>
+                      </Button> */}
                     </td>
                   </tr>
                 ))}
