@@ -5,8 +5,7 @@ import NavLinks from "../components/navLinks";
 import { CSVLink } from "react-csv";
 import GeneradorPDF from "../components/GeneradorPDF";
 import LoadingSpinner from "../components/loadingSpinner";
-import "react-datepicker/dist/react-datepicker.css";
-import DatePicker from "react-datepicker";
+
 
 function Profile() {
   const {
