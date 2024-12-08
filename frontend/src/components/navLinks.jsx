@@ -39,14 +39,7 @@ const NavLinks = () => {
       <FaUserAstronaut className="icon" />
       <span>Usuarios</span>
     </Link> */}
-    <Link to="/notificaciones" className="nav-link">
-      <FaRegBell className="icon" />
-      <span>Notificaciones</span>
-    </Link>
-    <Link to="/creaaenotificaciones" className="nav-link">
-      <FaRegBell className="icon" />
-      <span>Crear Notificación</span>
-    </Link>
+
     <Link to="/profile" className="nav-link">
       <CgProfile className="icon" />
       <span>Perfil Del Usuario</span>
