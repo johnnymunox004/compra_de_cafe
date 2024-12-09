@@ -147,19 +147,15 @@ function Profile() {
   }));
 
   // filtrossssssssssssssssssssssssssssssss
-  const getISOWeekNumber = (date) => {
-    const tempDate = new Date(date);
-    tempDate.setUTCDate(
-      tempDate.getUTCDate() + 4 - (tempDate.getUTCDay() || 7)
-    );
-    const yearStart = new Date(Date.UTC(tempDate.getUTCFullYear(), 0, 1));
-    const weekNumber = Math.ceil(((tempDate - yearStart) / 86400000 + 1) / 7);
-    return { year: tempDate.getUTCFullYear(), week: weekNumber };
-  };
 
   const filteredAspirantes = aspirantes.filter((aspirante) => {
     const lowerCaseSearchTerm = searchTerm.toLowerCase();
     const aspiranteDate = new Date(aspirante.date_create);
+
+    
+    const aspiranteISOWeek = `${aspiranteDate.getFullYear()}-W${String(
+      getISOWeekNumber(aspiranteDate).week
+    ).padStart(2, "0")}`;
 
     // Filtro por búsqueda
     const matchesSearch =
@@ -173,10 +169,7 @@ function Profile() {
       : true;
 
     // Filtro por semana ISO
-    const aspiranteWeek = getISOWeekNumber(aspiranteDate);
-    const matchesWeek = selectedWeek
-      ? parseInt(selectedWeek, 10) === aspiranteWeek.week
-      : true;
+    const matchesWeek = selectedWeek ? selectedWeek === aspiranteISOWeek : true;
 
     // Filtro por mes
     const matchesMonth = selectedMonth
@@ -217,18 +210,16 @@ function Profile() {
               />
             </div>
 
-        
             <div>
-  <Label htmlFor="week" value="Semana " />
-  <input
-    id="week"
-    type="week"
-    className="border border-gray-300 rounded-lg p-2 mt-2"
-    value={selectedWeek}
-    onChange={(e) => setSelectedWeek(e.target.value)}
-  />
-</div>
-
+              <Label htmlFor="week" value=" " />
+              <input
+                id="week"
+                type="week"
+                className="border border-gray-300 rounded-lg p-2 mt-2"
+                value={selectedWeek}
+                onChange={(e) => setSelectedWeek(e.target.value)}
+              />
+            </div>
 
             <div>
               <Label htmlFor="month" value="" />
