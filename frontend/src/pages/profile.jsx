@@ -17,7 +17,6 @@ function Profile() {
     deleteAspirante,
   } = useAspirantesStore();
 
-  
   const [selectedDate, setSelectedDate] = useState("");
   const [selectedWeek, setSelectedWeek] = useState("");
   const [selectedMonth, setSelectedMonth] = useState("");
@@ -42,6 +41,12 @@ function Profile() {
   const [editMode, setEditMode] = useState(false);
   const [currentId, setCurrentId] = useState(null);
   const [deleteId, setDeleteId] = useState(null);
+  // Define el componente Select al inicio
+  const Select = ({ children, ...props }) => (
+    <select {...props} className="px-4 py-2 border rounded">
+      {children}
+    </select>
+  );
 
   // estado para filtrar
   // Advanced filtering logic
@@ -347,13 +352,14 @@ function Profile() {
           </select>
 
           {/* Filtro por tipo de café */}
+
           <Select
             value={selectedCafeType}
             onChange={(e) => setSelectedCafeType(e.target.value)}
           >
             <option value="">Tipo de Café</option>
             <option value="Caturra">Caturra</option>
-            <option value="seco">Seco</option>
+            <option value="Seco">Seco</option>
             <option value="Variedad Colombia">Variedad Colombia</option>
             <option value="F6">F6</option>
             <option value="Borboun Rosado">Borboun Rosado</option>
