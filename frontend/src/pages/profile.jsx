@@ -17,6 +17,7 @@ function Profile() {
     deleteAspirante,
   } = useAspirantesStore();
 
+  const [searchTerm, setSearchTerm] = useState('');
   const [showModal, setShowModal] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [formData, setFormData] = useState({
