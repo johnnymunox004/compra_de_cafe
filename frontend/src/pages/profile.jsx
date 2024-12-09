@@ -217,19 +217,21 @@ function Profile() {
               />
             </div>
 
+        
             <div>
-              <Label htmlFor="week" value="Semana ISO" />
-              <TextInput
-                id="week"
-                type="number"
-                placeholder="Semana (1-52)"
-                value={selectedWeek}
-                onChange={handleWeekChange}
-              />
-            </div>
+  <Label htmlFor="week" value="Semana " />
+  <input
+    id="week"
+    type="week"
+    className="border border-gray-300 rounded-lg p-2 mt-2"
+    value={selectedWeek}
+    onChange={(e) => setSelectedWeek(e.target.value)}
+  />
+</div>
+
 
             <div>
-              <Label htmlFor="month" value="Mes" />
+              <Label htmlFor="month" value="" />
               <select
                 id="month"
                 value={selectedMonth}
