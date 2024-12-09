@@ -46,7 +46,9 @@ function DashboardListAspirant() {
     setFormData({ ...formData, [name]: formattedValue });
   };
 
-
+  const handleDateChange = (e) => {
+    setSelectedDate(e.target.value); // Actualizar la fecha seleccionada
+  };
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -137,9 +139,44 @@ function DashboardListAspirant() {
     Estado_monetario: aspirante.estado_monetario,
     Fecha: aspirante.date_create,
   }));
- 
+  const getVentasPorDia = () => {
+    const ventasPorDia = {};
 
+    // Filtrar las ventas
+    const ventas = aspirantes.filter(
+      (aspirante) => aspirante.estado === "venta"
+    );
 
+    // Agrupar por fecha
+    ventas.forEach((venta) => {
+      const fecha = new Date(venta.date_create).toLocaleDateString("en-CA");
+      const totalVenta = venta.precio_total; // Suponiendo que tienes este campo
+
+      if (!ventasPorDia[fecha]) {
+        ventasPorDia[fecha] = 0;
+      }
+      ventasPorDia[fecha] += totalVenta;
+    });
+
+    return ventasPorDia;
+  };
+
+  // Filtrar los aspirantes según la fecha seleccionada y el término de búsqueda
+  const filteredAspirantes = aspirantes.filter((aspirante) => {
+    const searchTermLower = searchTerm.toLowerCase();
+    const aspiranteDate = new Date(aspirante.date_create).toLocaleDateString(
+      "en-CA"
+    ); // Formatear la fecha
+    const matchesDate = selectedDate ? aspiranteDate === selectedDate : true; // Filtrar por fecha
+    const matchesSearch =
+      aspirante.nombre.toLowerCase().includes(searchTermLower) ||
+      aspirante.identificacion.toLowerCase().includes(searchTermLower) ||
+      aspirante.telefono.includes(searchTermLower);
+    return matchesDate && matchesSearch;
+  });
+
+  const calcularTotalPorFecha = () => {
+    if (!selectedDate) return 0; // Si no hay fecha seleccionada, retornamos 0
 
     const total = filteredAspirantes.reduce((acc, aspirante) => {
       const aspiranteDate = new Date(aspirante.date_create).toLocaleDateString(
@@ -344,7 +381,7 @@ function DashboardListAspirant() {
                 />
               </div>
               <div className="mb-4">
-                <Label htmlFor="estado"  />
+                <Label htmlFor="estado" value="Estado" />
                 <select
                   id="estado"
                   name="estado"
