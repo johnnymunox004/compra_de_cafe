@@ -34,9 +34,77 @@ function Profile() {
   const [editMode, setEditMode] = useState(false);
   const [currentId, setCurrentId] = useState(null);
   const [deleteId, setDeleteId] = useState(null);
-  const [searchTerm, setSearchTerm] = useState("");
-  const [selectedDate, setSelectedDate] = useState(""); // Estado para la fecha seleccionada
 
+
+    // estado para filtrar
+      // Advanced filtering logic
+  const filteredAspirantes = aspirantes.filter((aspirante) => {
+    const searchTermLower = searchTerm.toLowerCase();
+    const aspiranteDate = new Date(aspirante.date_create);
+    const aspiranteDateString = aspiranteDate.toLocaleDateString("en-CA");
+    const aspiranteWeek = getWeekNumber(aspiranteDate);
+    const aspiranteMonth = aspiranteDate.toLocaleString('default', { month: 'long' });
+
+    // Search term filter
+    const matchesSearch =
+      aspirante.nombre.toLowerCase().includes(searchTermLower) ||
+      aspirante.identificacion.toLowerCase().includes(searchTermLower) ||
+      aspirante.telefono.includes(searchTermLower);
+
+    // Date filter
+    const matchesDate = selectedDate 
+      ? aspiranteDateString === selectedDate 
+      : true;
+
+    // Week filter
+    const matchesWeek = selectedWeek 
+      ? aspiranteWeek === parseInt(selectedWeek) 
+      : true;
+
+    // Month filter
+    const matchesMonth = selectedMonth 
+      ? aspiranteMonth.toLowerCase() === selectedMonth.toLowerCase() 
+      : true;
+
+    // Monetary status filter
+    const matchesMonetaryStatus = selectedMonetaryStatus 
+      ? aspirante.estado_monetario === selectedMonetaryStatus 
+      : true;
+
+    // Cafe type filter
+    const matchesCafeType = selectedCafeType 
+      ? aspirante.tipo_cafe === selectedCafeType 
+      : true;
+
+    return (
+      matchesSearch && 
+      matchesDate && 
+      matchesWeek && 
+      matchesMonth && 
+      matchesMonetaryStatus && 
+      matchesCafeType
+    );
+  });
+
+  // Generar opciones de semanas para el año actual
+  const getWeekOptions = () => {
+    const currentYear = new Date().getFullYear();
+    const weeks = [];
+    for (let week = 1; week <= 52; week++) {
+      weeks.push(
+        <option key={week} value={week}>
+          Semana {week}
+        </option>
+      );
+    }
+    return weeks;
+  };
+
+  // Generar opciones de meses
+  const monthOptions = [
+    'Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 
+    'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'
+  ];
   useEffect(() => {
     fetchAspirantes(); // Llamada para obtener los aspirantes
   }, [fetchAspirantes]);
@@ -162,18 +230,7 @@ function Profile() {
   };
 
   // Filtrar los aspirantes según la fecha seleccionada y el término de búsqueda
-  const filteredAspirantes = aspirantes.filter((aspirante) => {
-    const searchTermLower = searchTerm.toLowerCase();
-    const aspiranteDate = new Date(aspirante.date_create).toLocaleDateString(
-      "en-CA"
-    ); // Formatear la fecha
-    const matchesDate = selectedDate ? aspiranteDate === selectedDate : true; // Filtrar por fecha
-    const matchesSearch =
-      aspirante.nombre.toLowerCase().includes(searchTermLower) ||
-      aspirante.identificacion.toLowerCase().includes(searchTermLower) ||
-      aspirante.telefono.includes(searchTermLower);
-    return matchesDate && matchesSearch;
-  });
+ 
 
   const calcularTotalPorFecha = () => {
     if (!selectedDate) return 0; // Si no hay fecha seleccionada, retornamos 0
@@ -201,7 +258,67 @@ function Profile() {
         <div className="p-8">
           <h1 className="text-2xl font-bold mt-6 mb-4">base de datos</h1>
 
+          <TextInput 
+            placeholder="Buscar por nombre, identificación o teléfono"
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            className="flex-grow"
+          />
 
+          {/* Filtro por fecha */}
+          <input 
+            type="date" 
+            value={selectedDate}
+            onChange={(e) => setSelectedDate(e.target.value)}
+            className="px-4 py-2 border rounded"
+          />
+
+          {/* Filtro por semana */}
+          <Select 
+            value={selectedWeek}
+            onChange={(e) => setSelectedWeek(e.target.value)}
+          >
+            <option value="">Todas las semanas</option>
+            {getWeekOptions()}
+          </Select>
+
+          {/* Filtro por mes */}
+          <Select 
+            value={selectedMonth}
+            onChange={(e) => setSelectedMonth(e.target.value)}
+          >
+            <option value="">Todos los meses</option>
+            {monthOptions.map(month => (
+              <option key={month} value={month}>{month}</option>
+            ))}
+          </Select>
+
+          {/* Filtro por estado monetario */}
+          <Select 
+            value={selectedMonetaryStatus}
+            onChange={(e) => setSelectedMonetaryStatus(e.target.value)}
+          >
+            <option value="">Estado Monetario</option>
+            <option value="pagado">Pagado</option>
+            <option value="pendiente">Pendiente</option>
+          </Select>
+
+          {/* Filtro por tipo de café */}
+          <Select 
+            value={selectedCafeType}
+            onChange={(e) => setSelectedCafeType(e.target.value)}
+          >
+            <option value="">Tipo de Café</option>
+            <option value="Caturra">Caturra</option>
+            <option value="seco">Seco</option>
+            <option value="Variedad Colombia">Variedad Colombia</option>
+            <option value="F6">F6</option>
+            <option value="Borboun Rosado">Borboun Rosado</option>
+            <option value="Geishar">Geishar</option>
+            <option value="Tabi">Tabi</option>
+            <option value="Variedad Castillo">Variedad Castillo</option>
+          </Select>
+        </div>
 
 
       
