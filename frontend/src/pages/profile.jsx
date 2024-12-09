@@ -152,13 +152,13 @@ function Profile() {
 
   // filtrossssssssssssssssssssssssssssssss
   function getISOWeekNumber(date) {
-    const tempDate = new Date(date.getTime());
-    tempDate.setHours(0, 0, 0, 0);
-    tempDate.setDate(tempDate.getDate() + 3 - (tempDate.getDay() + 6) % 7);
-    const firstThursday = tempDate;
-    const yearStart = new Date(firstThursday.getFullYear(), 0, 1);
-    const weekNumber = Math.ceil(((firstThursday - yearStart) / 86400000 + 1) / 7);
-    return weekNumber;
+    const d = new Date(date);
+    d.setHours(0, 0, 0, 0);
+    // Ajustar al jueves de la misma semana
+    d.setDate(d.getDate() + 3 - (d.getDay() + 6) % 7);
+    const yearStart = new Date(d.getFullYear(), 0, 1);
+    const weekNo = Math.ceil(((d - yearStart) / 86400000 + 1) / 7);
+    return weekNo;
   }
   
 
@@ -167,8 +167,8 @@ function Profile() {
     const aspiranteDate = new Date(aspirante.date_create);
 
 
-    const aspiranteISOWeek = `${aspiranteDate.getFullYear()}-W${String(
-      getISOWeekNumber(aspiranteDate).week
+    const aspiranteWeek = `${aspiranteDate.getFullYear()}-W${String(
+      getISOWeekNumber(aspiranteDate)
     ).padStart(2, "0")}`;
 
     // Filtro por búsqueda
@@ -183,8 +183,8 @@ function Profile() {
       : true;
 
     // Filtro por semana ISO
-    const matchesWeek = selectedWeek ? selectedWeek === aspiranteISOWeek : true;
-
+    const matchesWeek = selectedWeek ? selectedWeek === aspiranteWeek : true;    
+    
     // Filtro por mes
     const matchesMonth = selectedMonth
       ? aspiranteDate.getMonth() + 1 === parseInt(selectedMonth, 10)
