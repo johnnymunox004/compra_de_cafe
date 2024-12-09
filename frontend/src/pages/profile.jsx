@@ -17,6 +17,13 @@ function Profile() {
     deleteAspirante,
   } = useAspirantesStore();
 
+  
+  const [selectedDate, setSelectedDate] = useState("");
+  const [selectedWeek, setSelectedWeek] = useState("");
+  const [selectedMonth, setSelectedMonth] = useState("");
+  const [selectedMonetaryStatus, setSelectedMonetaryStatus] = useState("");
+  const [selectedCafeType, setSelectedCafeType] = useState("");
+
   const [searchTerm, setSearchTerm] = useState("");
   const [showModal, setShowModal] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
@@ -46,11 +53,6 @@ function Profile() {
     const aspiranteMonth = aspiranteDate.toLocaleString("default", {
       month: "long",
     });
-    const [selectedDate, setSelectedDate] = useState("");
-    const [selectedWeek, setSelectedWeek] = useState("");
-    const [selectedMonth, setSelectedMonth] = useState("");
-    const [selectedMonetaryStatus, setSelectedMonetaryStatus] = useState("");
-    const [selectedCafeType, setSelectedCafeType] = useState("");
 
     const Select = (props) => (
       <select {...props} className="px-4 py-2 border rounded">
