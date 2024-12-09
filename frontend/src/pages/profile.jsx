@@ -47,6 +47,7 @@ function Profile() {
       {children}
     </select>
   );
+  
 
   // estado para filtrar
   // Advanced filtering logic
@@ -58,12 +59,6 @@ function Profile() {
     const aspiranteMonth = aspiranteDate.toLocaleString("default", {
       month: "long",
     });
-
-    const Select = (props) => (
-      <select {...props} className="px-4 py-2 border rounded">
-        {props.children}
-      </select>
-    );
 
     const calcularTotalPorFecha = () => {
       if (!selectedDate) return 0;
@@ -82,6 +77,8 @@ function Profile() {
       const pastDaysOfYear = (date - firstDayOfYear) / 86400000;
       return Math.ceil((pastDaysOfYear + firstDayOfYear.getDay() + 1) / 7);
     };
+
+  
     // Search term filter
     const matchesSearch =
       aspirante.nombre.toLowerCase().includes(searchTermLower) ||
