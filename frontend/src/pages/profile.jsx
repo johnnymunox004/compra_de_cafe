@@ -383,7 +383,7 @@ function Profile() {
                 />
               </div>
               <div className="mb-4">
-                <Label htmlFor="estado" />
+                <Label htmlFor="estado" value="Estado" />
                 <select
                   id="estado"
                   name="estado"
