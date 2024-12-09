@@ -6,7 +6,6 @@ import { CSVLink } from "react-csv";
 import GeneradorPDF from "../components/GeneradorPDF";
 import LoadingSpinner from "../components/loadingSpinner";
 
-
 function Profile() {
   const {
     aspirantes,
@@ -17,12 +16,6 @@ function Profile() {
     updateAspirante,
     deleteAspirante,
   } = useAspirantesStore();
-
-  const [searchTerm, setSearchTerm] = useState(""); // Corregido
-
-  const [selectedWeek, setSelectedWeek] = useState(""); // Nuevo estado
-  const [selectedMonth, setSelectedMonth] = useState(null); // Cambiado a objeto de fecha
-  const [selectedDate, setSelectedDate] = useState(null); // Para filtro por día
 
   const [showModal, setShowModal] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
@@ -41,14 +34,8 @@ function Profile() {
   const [editMode, setEditMode] = useState(false);
   const [currentId, setCurrentId] = useState(null);
   const [deleteId, setDeleteId] = useState(null);
-
-  const handleSearchChange = (e) => setSearchTerm(e.target.value);
-
-  const handleDateChange = (e) => setSelectedDate(e.target.value);
-
-  const handleWeekChange = (e) => setSelectedWeek(e.target.value);
-
-  const handleMonthChange = (e) => setSelectedMonth(e.target.value);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [selectedDate, setSelectedDate] = useState(""); // Estado para la fecha seleccionada
 
   useEffect(() => {
     fetchAspirantes(); // Llamada para obtener los aspirantes
@@ -57,6 +44,10 @@ function Profile() {
     const { name, value } = e.target;
     const formattedValue = name === "precio" ? String(value) : value; // Convertir a cadena si es precio
     setFormData({ ...formData, [name]: formattedValue });
+  };
+
+  const handleDateChange = (e) => {
+    setSelectedDate(e.target.value); // Actualizar la fecha seleccionada
   };
 
   const handleSubmit = (e) => {
@@ -148,44 +139,58 @@ function Profile() {
     Estado_monetario: aspirante.estado_monetario,
     Fecha: aspirante.date_create,
   }));
+  const getVentasPorDia = () => {
+    const ventasPorDia = {};
 
-  // filtrossssssssssssssssssssssssssssssss
-  const getISOWeekNumber = (date) => {
-    const tempDate = new Date(date);
-    tempDate.setUTCDate(
-      tempDate.getUTCDate() + 4 - (tempDate.getUTCDay() || 7)
+    // Filtrar las ventas
+    const ventas = aspirantes.filter(
+      (aspirante) => aspirante.estado === "venta"
     );
-    const yearStart = new Date(Date.UTC(tempDate.getUTCFullYear(), 0, 1));
-    const weekNumber = Math.ceil(((tempDate - yearStart) / 86400000 + 1) / 7);
-    return { year: tempDate.getUTCFullYear(), week: weekNumber };
-  };
 
-  const filterAspirantes = () => {
-    return aspirantes.filter((aspirante) => {
-      const creationDate = new Date(aspirante.date_create);
+    // Agrupar por fecha
+    ventas.forEach((venta) => {
+      const fecha = new Date(venta.date_create).toLocaleDateString("en-CA");
+      const totalVenta = venta.precio_total; // Suponiendo que tienes este campo
 
-      // Filtrar por fecha exacta
-      if (selectedDate) {
-        return (
-          creationDate.toISOString().split("T")[0] ===
-          selectedDate.toISOString().split("T")[0]
-        );
+      if (!ventasPorDia[fecha]) {
+        ventasPorDia[fecha] = 0;
       }
-
-      // Filtrar por mes
-      if (selectedMonth) {
-        return (
-          creationDate.getFullYear() === selectedMonth.getFullYear() &&
-          creationDate.getMonth() === selectedMonth.getMonth()
-        );
-      }
-
-      // Si no hay filtro, mostrar todos
-      return true;
+      ventasPorDia[fecha] += totalVenta;
     });
+
+    return ventasPorDia;
   };
 
-  // filtrossssssssssssssssssssssssssssssss
+  // Filtrar los aspirantes según la fecha seleccionada y el término de búsqueda
+  const filteredAspirantes = aspirantes.filter((aspirante) => {
+    const searchTermLower = searchTerm.toLowerCase();
+    const aspiranteDate = new Date(aspirante.date_create).toLocaleDateString(
+      "en-CA"
+    ); // Formatear la fecha
+    const matchesDate = selectedDate ? aspiranteDate === selectedDate : true; // Filtrar por fecha
+    const matchesSearch =
+      aspirante.nombre.toLowerCase().includes(searchTermLower) ||
+      aspirante.identificacion.toLowerCase().includes(searchTermLower) ||
+      aspirante.telefono.includes(searchTermLower);
+    return matchesDate && matchesSearch;
+  });
+
+  const calcularTotalPorFecha = () => {
+    if (!selectedDate) return 0; // Si no hay fecha seleccionada, retornamos 0
+
+    const total = filteredAspirantes.reduce((acc, aspirante) => {
+      const aspiranteDate = new Date(aspirante.date_create).toLocaleDateString(
+        "en-CA"
+      );
+      return aspiranteDate === selectedDate
+        ? acc + (aspirante.precio_total || 0)
+        : acc; // Asegurarse de que precio_total esté definido
+    }, 0);
+
+    return total;
+  };
+
+  const ventasPorDia = getVentasPorDia();
 
   return (
     <div className="aside-dashboard flex">
@@ -195,19 +200,11 @@ function Profile() {
       <div className="main-dashboard">
         <div className="p-8">
           <h1 className="text-2xl font-bold mt-6 mb-4">base de datos</h1>
-          <div className="flex gap-4 mb-4">
-            <div>
-              <Label htmlFor="search" value="Buscar" />
-              <TextInput
-                id="search"
-                placeholder="Buscar por nombre o identificación"
-                value={searchTerm}
-                onChange={handleSearchChange}
-              />
-            </div>
 
-         
-          </div>
+
+
+
+      
 
           <CSVLink
             data={csvData}
@@ -383,7 +380,7 @@ function Profile() {
                 />
               </div>
               <div className="mb-4">
-                <Label htmlFor="estado" value="Estado" />
+                <Label htmlFor="estado" />
                 <select
                   id="estado"
                   name="estado"
@@ -400,20 +397,21 @@ function Profile() {
                 </select>
               </div>
               <div className="mb-4">
+   
                 <select
-                  id="estado_monetario"
-                  name="estado_monetario"
-                  value={formData.estado_monetario}
-                  onChange={handleInputChange}
-                  required
-                  className="form-select"
-                >
-                  <option value="" disabled>
-                    Selecciona una opción
-                  </option>
-                  <option value="pagado">Pagado</option>
-                  <option value="pendiente">Pendiente</option>
-                </select>
+          id="estado_monetario"
+          name="estado_monetario"
+          value={formData.estado_monetario}
+          onChange={handleInputChange}
+          required
+          className="form-select"
+        >
+          <option value="" disabled>
+            Selecciona una opción
+          </option>
+          <option value="pagado">Pagado</option>
+          <option value="pendiente">Pendiente</option>
+        </select>
               </div>
 
               <Button type="submit" className=" botones_de">
