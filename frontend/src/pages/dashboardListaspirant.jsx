@@ -36,6 +36,19 @@ function DashboardListAspirant() {
   const [deleteId, setDeleteId] = useState(null);
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedDate, setSelectedDate] = useState(""); // Estado para la fecha seleccionada
+    // Filtrar los aspirantes según la fecha seleccionada y el término de búsqueda
+    const filteredAspirantes = aspirantes.filter((aspirante) => {
+      const searchTermLower = searchTerm.toLowerCase();
+      const aspiranteDate = new Date(aspirante.date_create).toLocaleDateString(
+        "en-CA"
+      ); // Formatear la fecha
+      const matchesDate = selectedDate ? aspiranteDate === selectedDate : true; // Filtrar por fecha
+      const matchesSearch =
+        aspirante.nombre.toLowerCase().includes(searchTermLower) ||
+        aspirante.identificacion.toLowerCase().includes(searchTermLower) ||
+        aspirante.telefono.includes(searchTermLower);
+      return matchesDate && matchesSearch;
+    });
 
   useEffect(() => {
     fetchAspirantes(); // Llamada para obtener los aspirantes
@@ -161,19 +174,7 @@ function DashboardListAspirant() {
     return ventasPorDia;
   };
 
-  // Filtrar los aspirantes según la fecha seleccionada y el término de búsqueda
-  const filteredAspirantes = aspirantes.filter((aspirante) => {
-    const searchTermLower = searchTerm.toLowerCase();
-    const aspiranteDate = new Date(aspirante.date_create).toLocaleDateString(
-      "en-CA"
-    ); // Formatear la fecha
-    const matchesDate = selectedDate ? aspiranteDate === selectedDate : true; // Filtrar por fecha
-    const matchesSearch =
-      aspirante.nombre.toLowerCase().includes(searchTermLower) ||
-      aspirante.identificacion.toLowerCase().includes(searchTermLower) ||
-      aspirante.telefono.includes(searchTermLower);
-    return matchesDate && matchesSearch;
-  });
+
 
   const calcularTotalPorFecha = () => {
     if (!selectedDate) return 0; // Si no hay fecha seleccionada, retornamos 0
