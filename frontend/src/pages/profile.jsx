@@ -5,10 +5,7 @@ import NavLinks from "../components/navLinks";
 import { CSVLink } from "react-csv";
 import GeneradorPDF from "../components/GeneradorPDF";
 import LoadingSpinner from "../components/loadingSpinner";
-import { getISOWeek } from 'date-fns';
-
-
-
+import { getISOWeek } from "date-fns";
 
 function Profile() {
   const {
@@ -49,7 +46,6 @@ function Profile() {
   const handleWeekChange = (e) => setSelectedWeek(e.target.value);
 
   const handleMonthChange = (e) => setSelectedMonth(e.target.value);
-  
 
   useEffect(() => {
     fetchAspirantes(); // Llamada para obtener los aspirantes
@@ -155,17 +151,15 @@ function Profile() {
     const d = new Date(date);
     d.setHours(0, 0, 0, 0);
     // Ajustar al jueves de la misma semana
-    d.setDate(d.getDate() + 3 - (d.getDay() + 6) % 7);
+    d.setDate(d.getDate() + 3 - ((d.getDay() + 6) % 7));
     const yearStart = new Date(d.getFullYear(), 0, 1);
     const weekNo = Math.ceil(((d - yearStart) / 86400000 + 1) / 7);
     return weekNo;
   }
-  
 
   const filteredAspirantes = aspirantes.filter((aspirante) => {
     const lowerCaseSearchTerm = searchTerm.toLowerCase();
     const aspiranteDate = new Date(aspirante.date_create);
-
 
     const aspiranteWeek = `${aspiranteDate.getFullYear()}-W${String(
       getISOWeekNumber(aspiranteDate)
@@ -183,8 +177,8 @@ function Profile() {
       : true;
 
     // Filtro por semana ISO
-    const matchesWeek = selectedWeek ? selectedWeek === aspiranteWeek : true;    
-    
+    const matchesWeek = selectedWeek ? selectedWeek === aspiranteWeek : true;
+
     // Filtro por mes
     const matchesMonth = selectedMonth
       ? aspiranteDate.getMonth() + 1 === parseInt(selectedMonth, 10)
@@ -250,6 +244,20 @@ function Profile() {
                   </option>
                 ))}
               </select>
+            </div>
+            <div>
+              <Label value=" " />
+              <Button
+                color="gray"
+                onClick={() => {
+                  setSearchTerm("");
+                  setSelectedDate("");
+                  setSelectedWeek("");
+                  setSelectedMonth("");
+                }}
+              >
+                Borrar Filtros
+              </Button>
             </div>
           </div>
 
@@ -486,4 +494,3 @@ function Profile() {
 }
 
 export default Profile;
-
