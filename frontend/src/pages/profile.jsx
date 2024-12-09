@@ -542,7 +542,7 @@ function Profile() {
         <Modal show={showDeleteModal} onClose={() => setShowDeleteModal(false)}>
           <Modal.Header>Confirmar Eliminación</Modal.Header>
           <Modal.Body>
-            <p>¿Estás seguro de que deseas eliminar este aspirante?</p>
+            <p>¿Estás seguro de que deseas eliminar este aspirante ?</p>
           </Modal.Body>
           <Modal.Footer>
             <Button color="failure" onClick={handleDelete}>
