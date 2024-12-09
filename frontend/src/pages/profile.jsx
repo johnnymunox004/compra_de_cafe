@@ -7,7 +7,7 @@ import GeneradorPDF from "../components/GeneradorPDF";
 import LoadingSpinner from "../components/loadingSpinner";
 import { getISOWeek } from 'date-fns';
 
-const aspiranteISOWeek = getISOWeek(aspiranteDate);
+
 
 
 function Profile() {
@@ -27,6 +27,7 @@ function Profile() {
   const [selectedMonth, setSelectedMonth] = useState(""); // Nuevo estado
   const [showModal, setShowModal] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
+  
   const [formData, setFormData] = useState({
     nombre: "",
     identificacion: "",
@@ -42,7 +43,6 @@ function Profile() {
   const [editMode, setEditMode] = useState(false);
   const [currentId, setCurrentId] = useState(null);
   const [deleteId, setDeleteId] = useState(null);
-
   const handleSearchChange = (e) => setSearchTerm(e.target.value);
 
   const handleDateChange = (e) => setSelectedDate(e.target.value);
@@ -50,6 +50,8 @@ function Profile() {
   const handleWeekChange = (e) => setSelectedWeek(e.target.value);
 
   const handleMonthChange = (e) => setSelectedMonth(e.target.value);
+
+
 
   useEffect(() => {
     fetchAspirantes(); // Llamada para obtener los aspirantes
@@ -151,6 +153,9 @@ function Profile() {
   }));
 
   // filtrossssssssssssssssssssssssssssssss
+
+  const aspiranteISOWeek = `${aspiranteDate.getFullYear()}-W${String(getISOWeekNumber(aspiranteDate)).padStart(2, "0")}`;
+
   function getISOWeekNumber(date) {
     const tempDate = new Date(date.getTime());
     tempDate.setHours(0, 0, 0, 0);
@@ -158,19 +163,14 @@ function Profile() {
     const firstThursday = tempDate;
     const yearStart = new Date(firstThursday.getFullYear(), 0, 1);
     const weekNumber = Math.ceil(((firstThursday - yearStart) / 86400000 + 1) / 7);
-    return weekNumber;
+    return weekNumber; // Retorna el número de la semana
   }
   
-
   const filteredAspirantes = aspirantes.filter((aspirante) => {
     const lowerCaseSearchTerm = searchTerm.toLowerCase();
     const aspiranteDate = new Date(aspirante.date_create);
-
-
-    const aspiranteISOWeek = `${aspiranteDate.getFullYear()}-W${String(
-      getISOWeekNumber(aspiranteDate).week
-    ).padStart(2, "0")}`;
-
+    const aspiranteISOWeek = `${aspiranteDate.getFullYear()}-W${String(getISOWeekNumber(aspiranteDate)).padStart(2, "0")}`;
+  
     // Filtro por búsqueda
     const matchesSearch =
       aspirante.nombre.toLowerCase().includes(lowerCaseSearchTerm) ||
