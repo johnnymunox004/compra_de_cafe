@@ -5,6 +5,10 @@ import NavLinks from "../components/navLinks";
 import { CSVLink } from "react-csv";
 import GeneradorPDF from "../components/GeneradorPDF";
 import LoadingSpinner from "../components/loadingSpinner";
+import { getISOWeek } from 'date-fns';
+
+const aspiranteISOWeek = getISOWeek(aspiranteDate);
+
 
 function Profile() {
   const {
@@ -147,12 +151,22 @@ function Profile() {
   }));
 
   // filtrossssssssssssssssssssssssssssssss
+  function getISOWeekNumber(date) {
+    const tempDate = new Date(date.getTime());
+    tempDate.setHours(0, 0, 0, 0);
+    tempDate.setDate(tempDate.getDate() + 3 - (tempDate.getDay() + 6) % 7);
+    const firstThursday = tempDate;
+    const yearStart = new Date(firstThursday.getFullYear(), 0, 1);
+    const weekNumber = Math.ceil(((firstThursday - yearStart) / 86400000 + 1) / 7);
+    return weekNumber;
+  }
+  
 
   const filteredAspirantes = aspirantes.filter((aspirante) => {
     const lowerCaseSearchTerm = searchTerm.toLowerCase();
     const aspiranteDate = new Date(aspirante.date_create);
 
-    
+
     const aspiranteISOWeek = `${aspiranteDate.getFullYear()}-W${String(
       getISOWeekNumber(aspiranteDate).week
     ).padStart(2, "0")}`;
