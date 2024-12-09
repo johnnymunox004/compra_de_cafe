@@ -16,6 +16,9 @@ function Profile() {
     updateAspirante,
     deleteAspirante,
   } = useAspirantesStore();
+  // Si 'Te' es una función o variable, asegúrate de declararla antes de usarla
+let Te;  // Declarar antes de usar
+Te = algunValor;  // Luego asignar
 
   const [selectedDate, setSelectedDate] = useState("");
   const [selectedWeek, setSelectedWeek] = useState("");
