@@ -552,7 +552,6 @@ function Profile() {
           </Modal.Footer>
         </Modal>
       </div>
-    </div>
   );
 }
 
