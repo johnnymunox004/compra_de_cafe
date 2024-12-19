@@ -1,4 +1,6 @@
 import React, { useState } from 'react';
+import logo from '../asset/logo.jpeg';
+import imagen1 from '../asset/imgen_1.jpeg';
 
 export default function Home() {
   const [isModalOpen, setModalOpen] = useState(false);
@@ -10,7 +12,7 @@ export default function Home() {
         <div className="container mx-auto px-4 py-4 flex justify-between items-center">
           <div className="flex items-center space-x-4">
             <img 
-              src="/api/placeholder/100/100" 
+              src={logo} 
               alt="Coopsantuario Logo" 
               className="h-12 w-12 rounded-full object-cover"
             />
@@ -68,7 +70,7 @@ export default function Home() {
           </div>
           <div>
             <img 
-              src="/api/placeholder/600/400" 
+              src={imagen1}
               alt="Café de Natagá - Coopsantuario" 
               className="rounded-xl shadow-2xl object-cover w-full h-96"
             />
